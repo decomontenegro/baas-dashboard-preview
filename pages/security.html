@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security - BaaS Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e5e7eb; }
+        .card { background: linear-gradient(135deg, rgba(30,30,40,0.8) 0%, rgba(20,20,30,0.9) 100%); border: 1px solid rgba(255,255,255,0.1); }
+        .card:hover { border-color: rgba(99,102,241,0.3); }
+        .status-ok { color: #22c55e; }
+        .status-warning { color: #eab308; }
+        .status-error { color: #ef4444; }
+        .progress-bar { background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%); }
+        .glow { box-shadow: 0 0 20px rgba(99,102,241,0.2); }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="max-w-6xl mx-auto p-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Security Center</h1>
+                    <p class="text-gray-400 text-sm">Defense in depth configuration</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Score -->
+        <div class="card rounded-2xl p-6 mb-8 glow">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">Security Score</h2>
+                    <p class="text-gray-400 text-sm">Based on your current configuration</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-4xl font-bold text-green-400">87<span class="text-lg text-gray-500">/100</span></div>
+                    <p class="text-green-400 text-sm">Good</p>
+                </div>
+            </div>
+            <div class="w-full h-3 bg-gray-800 rounded-full overflow-hidden">
+                <div class="progress-bar h-full rounded-full transition-all duration-500" style="width: 87%"></div>
+            </div>
+            <div class="mt-4 flex gap-4 text-sm">
+                <span class="flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full"></span> 5 passed</span>
+                <span class="flex items-center gap-2"><span class="w-2 h-2 bg-yellow-500 rounded-full"></span> 2 warnings</span>
+                <span class="flex items-center gap-2"><span class="w-2 h-2 bg-red-500 rounded-full"></span> 0 critical</span>
+            </div>
+        </div>
+
+        <!-- Defense Layers -->
+        <h2 class="text-lg font-semibold text-white mb-4">Defense Layers</h2>
+        <div class="grid gap-4 mb-8">
+            <!-- Layer 1: Cloudflare Access -->
+            <div class="card rounded-xl p-5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center">
+                            <span class="text-xl">🛡️</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white">Cloudflare Access</h3>
+                            <p class="text-gray-400 text-sm">Identity-based authentication gate</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">Active</span>
+                        <button class="text-indigo-400 hover:text-indigo-300 text-sm">Configure →</button>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-800 grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-500">Policy</p>
+                        <p class="text-white">Allow: deco@*.com</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">MFA</p>
+                        <p class="text-green-400">Required</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Sessions</p>
+                        <p class="text-white">3 active</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layer 2: Cloudflare Tunnel -->
+            <div class="card rounded-xl p-5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center">
+                            <span class="text-xl">🔗</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white">Cloudflare Tunnel</h3>
+                            <p class="text-gray-400 text-sm">Secure outbound-only connectivity</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">Connected</span>
+                        <button class="text-indigo-400 hover:text-indigo-300 text-sm">View logs →</button>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-800 grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-500">Tunnel</p>
+                        <p class="text-white font-mono">clawdbot</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Hostname</p>
+                        <p class="text-white">dashboard.deco.ooo</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Origin</p>
+                        <p class="text-white font-mono">127.0.0.1:18789</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layer 3: Firewall -->
+            <div class="card rounded-xl p-5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center">
+                            <span class="text-xl">🧱</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white">UFW Firewall</h3>
+                            <p class="text-gray-400 text-sm">Inbound traffic control</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">Active</span>
+                        <button class="text-indigo-400 hover:text-indigo-300 text-sm">Manage rules →</button>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-800 grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-500">Allowed</p>
+                        <p class="text-white">SSH (22)</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Blocked</p>
+                        <p class="text-white">All other inbound</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Dashboard port</p>
+                        <p class="text-green-400">Not exposed ✓</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layer 4: Fail2ban -->
+            <div class="card rounded-xl p-5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center">
+                            <span class="text-xl">🚫</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white">Fail2ban</h3>
+                            <p class="text-gray-400 text-sm">Automatic brute-force protection</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">Running</span>
+                        <button class="text-indigo-400 hover:text-indigo-300 text-sm">View bans →</button>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-800 grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-500">Currently banned</p>
+                        <p class="text-red-400 font-bold">9 IPs</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Total banned</p>
+                        <p class="text-white">1,166</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Failed attempts</p>
+                        <p class="text-white">7,597</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layer 5: Dashboard Auth -->
+            <div class="card rounded-xl p-5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center">
+                            <span class="text-xl">🔐</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white">Dashboard Token</h3>
+                            <p class="text-gray-400 text-sm">Secret-based authentication</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">Configured</span>
+                        <button class="text-indigo-400 hover:text-indigo-300 text-sm">Rotate →</button>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-800 grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-500">Token strength</p>
+                        <p class="text-green-400">Strong (64 chars)</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Last rotated</p>
+                        <p class="text-white">7 days ago</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Expiry</p>
+                        <p class="text-white">Never</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layer 6: Device Pairing -->
+            <div class="card rounded-xl p-5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center">
+                            <span class="text-xl">📱</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white">Device Pairing</h3>
+                            <p class="text-gray-400 text-sm">Per-device trust verification</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">Enabled</span>
+                        <button class="text-indigo-400 hover:text-indigo-300 text-sm">Manage devices →</button>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-800 grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-500">Approved devices</p>
+                        <p class="text-white">4</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Pending</p>
+                        <p class="text-yellow-400">1</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Require approval</p>
+                        <p class="text-green-400">Yes ✓</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SSH Hardening -->
+        <h2 class="text-lg font-semibold text-white mb-4">SSH Configuration</h2>
+        <div class="card rounded-xl p-5 mb-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="text-center p-4 bg-gray-800/50 rounded-xl">
+                    <div class="text-2xl mb-2">🔑</div>
+                    <p class="text-gray-400 text-sm">Password Auth</p>
+                    <p class="text-green-400 font-semibold">Disabled ✓</p>
+                </div>
+                <div class="text-center p-4 bg-gray-800/50 rounded-xl">
+                    <div class="text-2xl mb-2">👤</div>
+                    <p class="text-gray-400 text-sm">Root Login</p>
+                    <p class="text-yellow-400 font-semibold">Key only ⚠️</p>
+                </div>
+                <div class="text-center p-4 bg-gray-800/50 rounded-xl">
+                    <div class="text-2xl mb-2">🔐</div>
+                    <p class="text-gray-400 text-sm">Pubkey Auth</p>
+                    <p class="text-green-400 font-semibold">Enabled ✓</p>
+                </div>
+                <div class="text-center p-4 bg-gray-800/50 rounded-xl">
+                    <div class="text-2xl mb-2">🛡️</div>
+                    <p class="text-gray-400 text-sm">Max Attempts</p>
+                    <p class="text-white font-semibold">3</p>
+                </div>
+            </div>
+            <div class="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+                <div class="flex items-start gap-3">
+                    <span class="text-yellow-400">⚠️</span>
+                    <div>
+                        <p class="text-yellow-400 font-medium">Recommendation</p>
+                        <p class="text-gray-400 text-sm">Create a non-root user and set PermitRootLogin to 'no' for maximum security.</p>
+                        <button class="mt-2 px-4 py-2 bg-yellow-500/20 text-yellow-400 rounded-lg text-sm hover:bg-yellow-500/30 transition">
+                            Run hardening wizard →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Security Events -->
+        <h2 class="text-lg font-semibold text-white mb-4">Recent Security Events</h2>
+        <div class="card rounded-xl overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-800/50">
+                    <tr class="text-left text-gray-400 text-sm">
+                        <th class="px-5 py-3">Event</th>
+                        <th class="px-5 py-3">Source</th>
+                        <th class="px-5 py-3">Status</th>
+                        <th class="px-5 py-3">Time</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-800">
+                    <tr class="hover:bg-gray-800/30">
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 bg-red-500/20 text-red-400 rounded-lg flex items-center justify-center">🚫</span>
+                                <span class="text-white">SSH brute force blocked</span>
+                            </div>
+                        </td>
+                        <td class="px-5 py-4 font-mono text-gray-400 text-sm">45.78.218.104</td>
+                        <td class="px-5 py-4"><span class="px-2 py-1 bg-red-500/20 text-red-400 rounded text-sm">Banned</span></td>
+                        <td class="px-5 py-4 text-gray-400 text-sm">2 min ago</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800/30">
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 bg-green-500/20 text-green-400 rounded-lg flex items-center justify-center">✓</span>
+                                <span class="text-white">Device paired successfully</span>
+                            </div>
+                        </td>
+                        <td class="px-5 py-4 font-mono text-gray-400 text-sm">Chrome/Mac</td>
+                        <td class="px-5 py-4"><span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-sm">Approved</span></td>
+                        <td class="px-5 py-4 text-gray-400 text-sm">1 hour ago</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800/30">
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center">🔑</span>
+                                <span class="text-white">Access login via Google</span>
+                            </div>
+                        </td>
+                        <td class="px-5 py-4 font-mono text-gray-400 text-sm">deco@*.com</td>
+                        <td class="px-5 py-4"><span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-sm">Success</span></td>
+                        <td class="px-5 py-4 text-gray-400 text-sm">3 hours ago</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800/30">
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 bg-purple-500/20 text-purple-400 rounded-lg flex items-center justify-center">🔄</span>
+                                <span class="text-white">Tunnel reconnected</span>
+                            </div>
+                        </td>
+                        <td class="px-5 py-4 font-mono text-gray-400 text-sm">cloudflared</td>
+                        <td class="px-5 py-4"><span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-sm">Info</span></td>
+                        <td class="px-5 py-4 text-gray-400 text-sm">6 hours ago</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Actions -->
+        <div class="mt-8 flex gap-4">
+            <button class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:opacity-90 transition">
+                Run Security Audit
+            </button>
+            <button class="px-6 py-3 bg-gray-800 text-white rounded-xl font-medium hover:bg-gray-700 transition">
+                Export Report
+            </button>
+            <button class="px-6 py-3 bg-gray-800 text-white rounded-xl font-medium hover:bg-gray-700 transition">
+                View Documentation
+            </button>
+        </div>
+    </div>
+</body>
+</html>

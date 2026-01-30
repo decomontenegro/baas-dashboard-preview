@@ -1,0 +1,2755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BaaS UI Kit - Premium Components</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════════════════════
+           CSS VARIABLES - Design Tokens
+        ═══════════════════════════════════════════════════════════════ */
+        :root {
+            /* Colors - Light Mode */
+            --color-primary: #6366f1;
+            --color-primary-hover: #4f46e5;
+            --color-primary-light: rgba(99, 102, 241, 0.1);
+            --color-secondary: #64748b;
+            --color-secondary-hover: #475569;
+            --color-success: #10b981;
+            --color-success-light: rgba(16, 185, 129, 0.1);
+            --color-warning: #f59e0b;
+            --color-warning-light: rgba(245, 158, 11, 0.1);
+            --color-danger: #ef4444;
+            --color-danger-hover: #dc2626;
+            --color-danger-light: rgba(239, 68, 68, 0.1);
+            --color-info: #3b82f6;
+            --color-info-light: rgba(59, 130, 246, 0.1);
+            
+            /* Neutrals */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-elevated: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #94a3b8;
+            --text-inverse: #ffffff;
+            --border-color: #e2e8f0;
+            --border-hover: #cbd5e1;
+            
+            /* Shadows */
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+            
+            /* Spacing */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-full: 9999px;
+            
+            /* Transitions */
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Font */
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        /* Dark Mode */
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-elevated: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
+            --border-color: #334155;
+            --border-hover: #475569;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           BASE STYLES
+        ═══════════════════════════════════════════════════════════════ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            transition: background var(--transition-base), color var(--transition-base);
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           SHOWCASE LAYOUT
+        ═══════════════════════════════════════════════════════════════ */
+        .showcase-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-8);
+        }
+        
+        .showcase-header {
+            text-align: center;
+            padding: var(--space-12) 0;
+            margin-bottom: var(--space-8);
+        }
+        
+        .showcase-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-primary), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-2);
+        }
+        
+        .showcase-header p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: var(--space-4);
+            right: var(--space-4);
+            z-index: 1000;
+        }
+        
+        .component-section {
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-6);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-base);
+        }
+        
+        .component-section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .component-section h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--color-primary), #a855f7);
+            border-radius: var(--radius-full);
+        }
+        
+        .component-section p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: var(--space-6);
+        }
+        
+        .component-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-4);
+            align-items: center;
+        }
+        
+        .component-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-4);
+            align-items: center;
+            margin-bottom: var(--space-4);
+        }
+        
+        .component-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-2);
+        }
+        
+        .component-group {
+            margin-bottom: var(--space-6);
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           1. BUTTONS
+        ═══════════════════════════════════════════════════════════════ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            font-family: inherit;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Sizes */
+        .btn-sm {
+            height: 32px;
+            padding: 0 var(--space-3);
+            font-size: 0.8125rem;
+            border-radius: var(--radius-sm);
+        }
+        
+        .btn-md {
+            height: 40px;
+            padding: 0 var(--space-4);
+            font-size: 0.875rem;
+            border-radius: var(--radius-md);
+        }
+        
+        .btn-lg {
+            height: 48px;
+            padding: 0 var(--space-6);
+            font-size: 1rem;
+            border-radius: var(--radius-md);
+        }
+        
+        /* Primary */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), #818cf8);
+            color: white;
+            box-shadow: var(--shadow-sm), 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--color-primary-hover), var(--color-primary));
+            box-shadow: var(--shadow-md), 0 4px 12px rgba(99, 102, 241, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-xs);
+        }
+        
+        .btn-primary:focus {
+            outline: none;
+            box-shadow: var(--shadow-sm), 0 0 0 3px var(--color-primary-light);
+        }
+        
+        /* Secondary */
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border-color);
+            border-color: var(--border-hover);
+        }
+        
+        .btn-secondary:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px var(--color-primary-light);
+        }
+        
+        /* Ghost */
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+        
+        .btn-ghost:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .btn-ghost:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px var(--color-primary-light);
+        }
+        
+        /* Danger */
+        .btn-danger {
+            background: linear-gradient(135deg, var(--color-danger), #f87171);
+            color: white;
+            box-shadow: var(--shadow-sm), 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, var(--color-danger-hover), var(--color-danger));
+            box-shadow: var(--shadow-md), 0 4px 12px rgba(239, 68, 68, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        /* Disabled */
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* Loading */
+        .btn-loading {
+            color: transparent !important;
+            pointer-events: none;
+        }
+        
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        .btn-primary.btn-loading::after,
+        .btn-danger.btn-loading::after {
+            border-top-color: white;
+        }
+        
+        .btn-secondary.btn-loading::after,
+        .btn-ghost.btn-loading::after {
+            border-top-color: var(--text-primary);
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Button Icon */
+        .btn-icon {
+            width: 40px;
+            padding: 0;
+        }
+        
+        .btn-icon.btn-sm { width: 32px; }
+        .btn-icon.btn-lg { width: 48px; }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           2. INPUTS
+        ═══════════════════════════════════════════════════════════════ */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+        
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-label-required::after {
+            content: ' *';
+            color: var(--color-danger);
+        }
+        
+        .input {
+            font-family: inherit;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+            width: 100%;
+        }
+        
+        .input::placeholder {
+            color: var(--text-tertiary);
+        }
+        
+        /* Input Sizes */
+        .input-sm {
+            height: 32px;
+            padding: 0 var(--space-3);
+            font-size: 0.8125rem;
+            border-radius: var(--radius-sm);
+        }
+        
+        .input-md {
+            height: 40px;
+            padding: 0 var(--space-4);
+            font-size: 0.875rem;
+            border-radius: var(--radius-md);
+        }
+        
+        .input-lg {
+            height: 48px;
+            padding: 0 var(--space-5);
+            font-size: 1rem;
+            border-radius: var(--radius-md);
+        }
+        
+        .input:hover {
+            border-color: var(--border-hover);
+        }
+        
+        .input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-light);
+        }
+        
+        .input:disabled {
+            background: var(--bg-tertiary);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        /* Input Error */
+        .input-error {
+            border-color: var(--color-danger);
+        }
+        
+        .input-error:focus {
+            border-color: var(--color-danger);
+            box-shadow: 0 0 0 3px var(--color-danger-light);
+        }
+        
+        .form-error {
+            font-size: 0.75rem;
+            color: var(--color-danger);
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+        
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+        
+        /* Search Input */
+        .input-search-wrapper {
+            position: relative;
+        }
+        
+        .input-search-wrapper .input {
+            padding-left: 40px;
+        }
+        
+        .input-search-icon {
+            position: absolute;
+            left: var(--space-3);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            pointer-events: none;
+        }
+        
+        /* Textarea */
+        .textarea {
+            min-height: 100px;
+            padding: var(--space-3) var(--space-4);
+            resize: vertical;
+            line-height: 1.5;
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           3. SELECT / DROPDOWN
+        ═══════════════════════════════════════════════════════════════ */
+        .select-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .select {
+            appearance: none;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-family: inherit;
+            cursor: pointer;
+            padding-right: 40px;
+            transition: all var(--transition-fast);
+        }
+        
+        .select-wrapper::after {
+            content: '';
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--text-tertiary);
+            pointer-events: none;
+            transition: transform var(--transition-fast);
+        }
+        
+        .select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-light);
+        }
+        
+        /* Custom Dropdown */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-2);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .dropdown-trigger:hover {
+            border-color: var(--border-hover);
+        }
+        
+        .dropdown-trigger:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-light);
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 200px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all var(--transition-fast);
+            padding: var(--space-1);
+        }
+        
+        .dropdown.open .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-3);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+        
+        .dropdown-item:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .dropdown-item.selected {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+        
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: var(--space-1) 0;
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           4. TOGGLE SWITCH
+        ═══════════════════════════════════════════════════════════════ */
+        .toggle {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .toggle-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-track {
+            position: relative;
+            background: var(--border-color);
+            border-radius: var(--radius-full);
+            transition: all var(--transition-fast);
+        }
+        
+        .toggle-thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-fast);
+        }
+        
+        /* Toggle Sizes */
+        .toggle-sm .toggle-track {
+            width: 36px;
+            height: 20px;
+        }
+        .toggle-sm .toggle-thumb {
+            width: 16px;
+            height: 16px;
+        }
+        .toggle-sm .toggle-input:checked + .toggle-track .toggle-thumb {
+            transform: translateX(16px);
+        }
+        
+        .toggle-md .toggle-track {
+            width: 44px;
+            height: 24px;
+        }
+        .toggle-md .toggle-thumb {
+            width: 20px;
+            height: 20px;
+        }
+        .toggle-md .toggle-input:checked + .toggle-track .toggle-thumb {
+            transform: translateX(20px);
+        }
+        
+        .toggle-lg .toggle-track {
+            width: 56px;
+            height: 30px;
+        }
+        .toggle-lg .toggle-thumb {
+            width: 26px;
+            height: 26px;
+        }
+        .toggle-lg .toggle-input:checked + .toggle-track .toggle-thumb {
+            transform: translateX(26px);
+        }
+        
+        /* Toggle States */
+        .toggle:hover .toggle-track {
+            background: var(--border-hover);
+        }
+        
+        .toggle-input:checked + .toggle-track {
+            background: linear-gradient(135deg, var(--color-primary), #818cf8);
+        }
+        
+        .toggle-input:focus + .toggle-track {
+            box-shadow: 0 0 0 3px var(--color-primary-light);
+        }
+        
+        .toggle-input:disabled + .toggle-track {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .toggle-label {
+            margin-left: var(--space-2);
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           5. SLIDER
+        ═══════════════════════════════════════════════════════════════ */
+        .slider {
+            position: relative;
+            width: 100%;
+            user-select: none;
+        }
+        
+        .slider-track {
+            position: relative;
+            background: var(--border-color);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+        }
+        
+        .slider-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: linear-gradient(135deg, var(--color-primary), #818cf8);
+            border-radius: var(--radius-full);
+            transition: width var(--transition-fast);
+        }
+        
+        .slider-thumb {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 2px solid var(--color-primary);
+            border-radius: 50%;
+            box-shadow: var(--shadow-md);
+            cursor: grab;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        
+        .slider-thumb:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .slider-thumb:active {
+            cursor: grabbing;
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+        
+        /* Slider Sizes */
+        .slider-sm .slider-track { height: 4px; }
+        .slider-sm .slider-thumb { width: 14px; height: 14px; }
+        
+        .slider-md .slider-track { height: 6px; }
+        .slider-md .slider-thumb { width: 18px; height: 18px; }
+        
+        .slider-lg .slider-track { height: 8px; }
+        .slider-lg .slider-thumb { width: 22px; height: 22px; }
+        
+        .slider-value {
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-top: var(--space-2);
+        }
+        
+        /* Slider Disabled */
+        .slider.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           6. MODAL / DIALOG
+        ═══════════════════════════════════════════════════════════════ */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-base);
+        }
+        
+        .modal-backdrop.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            max-width: 90vw;
+            max-height: 85vh;
+            overflow: hidden;
+            transform: scale(0.95) translateY(10px);
+            transition: transform var(--transition-base);
+        }
+        
+        .modal-backdrop.open .modal {
+            transform: scale(1) translateY(0);
+        }
+        
+        /* Modal Sizes */
+        .modal-sm { width: 400px; }
+        .modal-md { width: 500px; }
+        .modal-lg { width: 640px; }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-5) var(--space-6);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .modal-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-tertiary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .modal-close:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: var(--space-6);
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+        
+        .modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: var(--space-3);
+            padding: var(--space-4) var(--space-6);
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           7. TOAST / NOTIFICATIONS
+        ═══════════════════════════════════════════════════════════════ */
+        .toast-container {
+            position: fixed;
+            top: var(--space-4);
+            right: var(--space-4);
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+        
+        .toast {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+            min-width: 320px;
+            max-width: 420px;
+            padding: var(--space-4);
+            background: var(--bg-elevated);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--color-info);
+            transform: translateX(120%);
+            transition: transform var(--transition-slow);
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast-success { border-left-color: var(--color-success); }
+        .toast-warning { border-left-color: var(--color-warning); }
+        .toast-error { border-left-color: var(--color-danger); }
+        .toast-info { border-left-color: var(--color-info); }
+        
+        .toast-icon {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .toast-success .toast-icon { color: var(--color-success); }
+        .toast-warning .toast-icon { color: var(--color-warning); }
+        .toast-error .toast-icon { color: var(--color-danger); }
+        .toast-info .toast-icon { color: var(--color-info); }
+        
+        .toast-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .toast-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            margin-bottom: var(--space-1);
+        }
+        
+        .toast-message {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        
+        .toast-close {
+            flex-shrink: 0;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            color: var(--text-tertiary);
+            transition: color var(--transition-fast);
+        }
+        
+        .toast-close:hover {
+            color: var(--text-primary);
+        }
+        
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--color-primary);
+            border-radius: 0 0 0 var(--radius-lg);
+            animation: toast-progress 5s linear forwards;
+        }
+        
+        @keyframes toast-progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           8. BADGE
+        ═══════════════════════════════════════════════════════════════ */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            border-radius: var(--radius-full);
+            white-space: nowrap;
+        }
+        
+        /* Badge Sizes */
+        .badge-sm {
+            height: 18px;
+            padding: 0 6px;
+            font-size: 0.6875rem;
+        }
+        
+        .badge-md {
+            height: 22px;
+            padding: 0 8px;
+            font-size: 0.75rem;
+        }
+        
+        .badge-lg {
+            height: 26px;
+            padding: 0 10px;
+            font-size: 0.8125rem;
+        }
+        
+        /* Badge Variants */
+        .badge-default {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+        
+        .badge-primary {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+        
+        .badge-success {
+            background: var(--color-success-light);
+            color: var(--color-success);
+        }
+        
+        .badge-warning {
+            background: var(--color-warning-light);
+            color: var(--color-warning);
+        }
+        
+        .badge-danger {
+            background: var(--color-danger-light);
+            color: var(--color-danger);
+        }
+        
+        .badge-info {
+            background: var(--color-info-light);
+            color: var(--color-info);
+        }
+        
+        /* Badge with Dot */
+        .badge-dot {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .badge-dot::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        
+        /* Count Badge */
+        .badge-count {
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            font-size: 0.6875rem;
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           9. AVATAR
+        ═══════════════════════════════════════════════════════════════ */
+        .avatar {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary), #a855f7);
+            color: white;
+            font-weight: 600;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Avatar Sizes */
+        .avatar-xs { width: 24px; height: 24px; font-size: 0.625rem; }
+        .avatar-sm { width: 32px; height: 32px; font-size: 0.75rem; }
+        .avatar-md { width: 40px; height: 40px; font-size: 0.875rem; }
+        .avatar-lg { width: 48px; height: 48px; font-size: 1rem; }
+        .avatar-xl { width: 64px; height: 64px; font-size: 1.25rem; }
+        .avatar-2xl { width: 80px; height: 80px; font-size: 1.5rem; }
+        
+        /* Avatar Status */
+        .avatar-status {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 25%;
+            height: 25%;
+            min-width: 8px;
+            min-height: 8px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
+        }
+        
+        .avatar-status-online { background: var(--color-success); }
+        .avatar-status-offline { background: var(--text-tertiary); }
+        .avatar-status-busy { background: var(--color-danger); }
+        .avatar-status-away { background: var(--color-warning); }
+        
+        /* Avatar Group */
+        .avatar-group {
+            display: flex;
+        }
+        
+        .avatar-group .avatar {
+            border: 2px solid var(--bg-primary);
+            margin-left: -8px;
+        }
+        
+        .avatar-group .avatar:first-child {
+            margin-left: 0;
+        }
+        
+        /* Avatar Square */
+        .avatar-square {
+            border-radius: var(--radius-md);
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           10. CARD
+        ═══════════════════════════════════════════════════════════════ */
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            transition: all var(--transition-base);
+        }
+        
+        .card-hover:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        
+        .card-clickable {
+            cursor: pointer;
+        }
+        
+        .card-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            background: var(--bg-tertiary);
+        }
+        
+        .card-header {
+            padding: var(--space-4) var(--space-5);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .card-subtitle {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin-top: var(--space-1);
+        }
+        
+        .card-body {
+            padding: var(--space-5);
+        }
+        
+        .card-footer {
+            padding: var(--space-4) var(--space-5);
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+        
+        /* Card Variants */
+        .card-elevated {
+            border: none;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .card-outlined {
+            border: 2px solid var(--border-color);
+        }
+        
+        .card-gradient {
+            background: linear-gradient(135deg, var(--color-primary), #a855f7);
+            border: none;
+            color: white;
+        }
+        
+        .card-gradient .card-title,
+        .card-gradient .card-subtitle {
+            color: white;
+        }
+        
+        .card-gradient .card-subtitle {
+            opacity: 0.8;
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           11. TABLE
+        ═══════════════════════════════════════════════════════════════ */
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        
+        .table th,
+        .table td {
+            padding: var(--space-3) var(--space-4);
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+        
+        .table th.sortable {
+            cursor: pointer;
+            user-select: none;
+            transition: color var(--transition-fast);
+        }
+        
+        .table th.sortable:hover {
+            color: var(--text-primary);
+        }
+        
+        .table th.sorted {
+            color: var(--color-primary);
+        }
+        
+        .table th .sort-icon {
+            display: inline-flex;
+            margin-left: var(--space-1);
+            opacity: 0.5;
+        }
+        
+        .table th.sorted .sort-icon {
+            opacity: 1;
+        }
+        
+        .table tbody tr {
+            transition: background var(--transition-fast);
+        }
+        
+        .table tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+        
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .table td {
+            color: var(--text-primary);
+        }
+        
+        /* Table Pagination */
+        .table-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-4);
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+        
+        .table-pagination-info {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+        
+        .table-pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .pagination-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .pagination-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+        
+        .pagination-btn.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
+        }
+        
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           12. TABS
+        ═══════════════════════════════════════════════════════════════ */
+        .tabs {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tabs-list {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            gap: var(--space-1);
+        }
+        
+        .tab {
+            position: relative;
+            padding: var(--space-3) var(--space-4);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .tab:hover {
+            color: var(--text-primary);
+        }
+        
+        .tab.active {
+            color: var(--color-primary);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--color-primary);
+            border-radius: var(--radius-full) var(--radius-full) 0 0;
+        }
+        
+        .tab:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .tab-content {
+            padding: var(--space-5) 0;
+        }
+        
+        /* Tabs Pills Variant */
+        .tabs-pills .tabs-list {
+            border-bottom: none;
+            background: var(--bg-tertiary);
+            padding: var(--space-1);
+            border-radius: var(--radius-lg);
+            gap: var(--space-1);
+        }
+        
+        .tabs-pills .tab {
+            border-radius: var(--radius-md);
+            padding: var(--space-2) var(--space-4);
+        }
+        
+        .tabs-pills .tab.active {
+            background: var(--bg-primary);
+            box-shadow: var(--shadow-sm);
+            color: var(--text-primary);
+        }
+        
+        .tabs-pills .tab.active::after {
+            display: none;
+        }
+        
+        /* Tab Badge */
+        .tab-badge {
+            margin-left: var(--space-2);
+            padding: 2px 6px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-full);
+        }
+        
+        .tab.active .tab-badge {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           13. TOOLTIP
+        ═══════════════════════════════════════════════════════════════ */
+        .tooltip-wrapper {
+            position: relative;
+            display: inline-flex;
+        }
+        
+        .tooltip {
+            position: absolute;
+            z-index: 1000;
+            padding: var(--space-2) var(--space-3);
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: white;
+            background: var(--text-primary);
+            border-radius: var(--radius-md);
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-fast);
+            pointer-events: none;
+        }
+        
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            border: 5px solid transparent;
+        }
+        
+        /* Tooltip Positions */
+        .tooltip-top {
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+        }
+        
+        .tooltip-top::after {
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-top-color: var(--text-primary);
+        }
+        
+        .tooltip-bottom {
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-4px);
+        }
+        
+        .tooltip-bottom::after {
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-color: var(--text-primary);
+        }
+        
+        .tooltip-left {
+            right: calc(100% + 8px);
+            top: 50%;
+            transform: translateY(-50%) translateX(4px);
+        }
+        
+        .tooltip-left::after {
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-left-color: var(--text-primary);
+        }
+        
+        .tooltip-right {
+            left: calc(100% + 8px);
+            top: 50%;
+            transform: translateY(-50%) translateX(-4px);
+        }
+        
+        .tooltip-right::after {
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-right-color: var(--text-primary);
+        }
+        
+        /* Tooltip Visible */
+        .tooltip-wrapper:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .tooltip-wrapper:hover .tooltip-top {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .tooltip-wrapper:hover .tooltip-bottom {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .tooltip-wrapper:hover .tooltip-left {
+            transform: translateY(-50%) translateX(0);
+        }
+        
+        .tooltip-wrapper:hover .tooltip-right {
+            transform: translateY(-50%) translateX(0);
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           14. SKELETON LOADER
+        ═══════════════════════════════════════════════════════════════ */
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                var(--bg-tertiary) 25%,
+                var(--border-color) 50%,
+                var(--bg-tertiary) 75%
+            );
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: var(--radius-md);
+        }
+        
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .skeleton-text {
+            height: 16px;
+            margin-bottom: var(--space-2);
+        }
+        
+        .skeleton-text:last-child {
+            width: 70%;
+        }
+        
+        .skeleton-title {
+            height: 24px;
+            width: 50%;
+            margin-bottom: var(--space-3);
+        }
+        
+        .skeleton-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        
+        .skeleton-image {
+            width: 100%;
+            height: 160px;
+        }
+        
+        .skeleton-button {
+            width: 100px;
+            height: 40px;
+        }
+        
+        .skeleton-card {
+            padding: var(--space-4);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           15. EMPTY STATE
+        ═══════════════════════════════════════════════════════════════ */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-12);
+            text-align: center;
+        }
+        
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: var(--space-5);
+            color: var(--text-tertiary);
+            opacity: 0.5;
+        }
+        
+        .empty-state-illustration {
+            width: 200px;
+            height: 150px;
+            margin-bottom: var(--space-5);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .empty-state-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+        }
+        
+        .empty-state-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            max-width: 360px;
+            margin-bottom: var(--space-5);
+        }
+        
+        .empty-state-actions {
+            display: flex;
+            gap: var(--space-3);
+        }
+        
+        /* ═══════════════════════════════════════════════════════════════
+           UTILITIES
+        ═══════════════════════════════════════════════════════════════ */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-1 { gap: var(--space-1); }
+        .gap-2 { gap: var(--space-2); }
+        .gap-3 { gap: var(--space-3); }
+        .gap-4 { gap: var(--space-4); }
+        .w-full { width: 100%; }
+        .mt-2 { margin-top: var(--space-2); }
+        .mt-4 { margin-top: var(--space-4); }
+        .mb-2 { margin-bottom: var(--space-2); }
+        .mb-4 { margin-bottom: var(--space-4); }
+        
+        /* Demo styles */
+        .demo-box {
+            padding: var(--space-4);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            min-width: 200px;
+        }
+        
+        .demo-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-4);
+        }
+        
+        .demo-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle">
+        <label class="toggle toggle-md">
+            <input type="checkbox" class="toggle-input" id="themeToggle" onchange="toggleTheme()">
+            <span class="toggle-track">
+                <span class="toggle-thumb"></span>
+            </span>
+            <span class="toggle-label">Dark Mode</span>
+        </label>
+    </div>
+    
+    <div class="showcase-container">
+        <header class="showcase-header">
+            <h1>🎨 BaaS UI Kit</h1>
+            <p>Premium Components for Bot-as-a-Service Dashboard</p>
+        </header>
+        
+        <!-- 1. BUTTONS -->
+        <section class="component-section">
+            <h2>Buttons</h2>
+            <p>Interactive buttons with multiple variants, sizes, and states</p>
+            
+            <div class="component-group">
+                <div class="component-label">Variants</div>
+                <div class="component-row">
+                    <button class="btn btn-md btn-primary">Primary</button>
+                    <button class="btn btn-md btn-secondary">Secondary</button>
+                    <button class="btn btn-md btn-ghost">Ghost</button>
+                    <button class="btn btn-md btn-danger">Danger</button>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-label">Sizes</div>
+                <div class="component-row">
+                    <button class="btn btn-sm btn-primary">Small</button>
+                    <button class="btn btn-md btn-primary">Medium</button>
+                    <button class="btn btn-lg btn-primary">Large</button>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-label">States</div>
+                <div class="component-row">
+                    <button class="btn btn-md btn-primary">Default</button>
+                    <button class="btn btn-md btn-primary btn-loading">Loading</button>
+                    <button class="btn btn-md btn-primary" disabled>Disabled</button>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-label">With Icons</div>
+                <div class="component-row">
+                    <button class="btn btn-md btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Add New
+                    </button>
+                    <button class="btn btn-md btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7,10 12,15 17,10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Download
+                    </button>
+                    <button class="btn btn-md btn-icon btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 2. INPUTS -->
+        <section class="component-section">
+            <h2>Inputs</h2>
+            <p>Text inputs, search fields, and textareas with labels and validation</p>
+            
+            <div class="demo-grid">
+                <div class="form-group">
+                    <label class="form-label form-label-required">Email Address</label>
+                    <input type="email" class="input input-md" placeholder="you@example.com">
+                    <span class="form-hint">We'll never share your email</span>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="input input-md input-error" value="123">
+                    <span class="form-error">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        Password must be at least 8 characters
+                    </span>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Search</label>
+                    <div class="input-search-wrapper">
+                        <svg class="input-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        <input type="text" class="input input-md" placeholder="Search...">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="component-group mt-4">
+                <div class="component-label">Sizes</div>
+                <div class="demo-grid">
+                    <input type="text" class="input input-sm" placeholder="Small input">
+                    <input type="text" class="input input-md" placeholder="Medium input">
+                    <input type="text" class="input input-lg" placeholder="Large input">
+                </div>
+            </div>
+            
+            <div class="component-group mt-4">
+                <div class="component-label">Textarea</div>
+                <div class="form-group" style="max-width: 500px;">
+                    <label class="form-label">Message</label>
+                    <textarea class="input textarea" placeholder="Write your message here..."></textarea>
+                </div>
+            </div>
+            
+            <div class="component-group mt-4">
+                <div class="component-label">Disabled</div>
+                <input type="text" class="input input-md" placeholder="Disabled input" disabled style="max-width: 300px;">
+            </div>
+        </section>
+        
+        <!-- 3. SELECT / DROPDOWN -->
+        <section class="component-section">
+            <h2>Select / Dropdown</h2>
+            <p>Native selects and custom dropdown menus</p>
+            
+            <div class="demo-inline">
+                <div class="form-group">
+                    <label class="form-label">Native Select</label>
+                    <div class="select-wrapper">
+                        <select class="select input input-md">
+                            <option>Choose an option</option>
+                            <option>Option 1</option>
+                            <option>Option 2</option>
+                            <option>Option 3</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Custom Dropdown</label>
+                    <div class="dropdown" id="dropdown1">
+                        <button class="dropdown-trigger input input-md" onclick="toggleDropdown('dropdown1')" style="min-width: 200px;">
+                            <span>Select status</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m6 9 6 6 6-6"/>
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-item">
+                                <span class="badge badge-sm badge-success badge-dot">Active</span>
+                            </div>
+                            <div class="dropdown-item">
+                                <span class="badge badge-sm badge-warning badge-dot">Pending</span>
+                            </div>
+                            <div class="dropdown-item">
+                                <span class="badge badge-sm badge-danger badge-dot">Inactive</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+                                </svg>
+                                All statuses
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 4. TOGGLE SWITCH -->
+        <section class="component-section">
+            <h2>Toggle Switch</h2>
+            <p>Elegant toggle switches for on/off states</p>
+            
+            <div class="component-group">
+                <div class="component-label">Sizes</div>
+                <div class="demo-inline">
+                    <label class="toggle toggle-sm">
+                        <input type="checkbox" class="toggle-input" checked>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="toggle-label">Small</span>
+                    </label>
+                    
+                    <label class="toggle toggle-md">
+                        <input type="checkbox" class="toggle-input" checked>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="toggle-label">Medium</span>
+                    </label>
+                    
+                    <label class="toggle toggle-lg">
+                        <input type="checkbox" class="toggle-input" checked>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="toggle-label">Large</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-label">States</div>
+                <div class="demo-inline">
+                    <label class="toggle toggle-md">
+                        <input type="checkbox" class="toggle-input">
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="toggle-label">Off</span>
+                    </label>
+                    
+                    <label class="toggle toggle-md">
+                        <input type="checkbox" class="toggle-input" checked>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="toggle-label">On</span>
+                    </label>
+                    
+                    <label class="toggle toggle-md">
+                        <input type="checkbox" class="toggle-input" disabled>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="toggle-label">Disabled</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 5. SLIDER -->
+        <section class="component-section">
+            <h2>Slider</h2>
+            <p>Custom range sliders for value selection</p>
+            
+            <div class="demo-grid">
+                <div>
+                    <div class="component-label">Small</div>
+                    <div class="slider slider-sm" data-value="30">
+                        <div class="slider-track">
+                            <div class="slider-fill" style="width: 30%;"></div>
+                            <div class="slider-thumb" style="left: 30%;"></div>
+                        </div>
+                    </div>
+                    <div class="slider-value">30%</div>
+                </div>
+                
+                <div>
+                    <div class="component-label">Medium</div>
+                    <div class="slider slider-md" data-value="60">
+                        <div class="slider-track">
+                            <div class="slider-fill" style="width: 60%;"></div>
+                            <div class="slider-thumb" style="left: 60%;"></div>
+                        </div>
+                    </div>
+                    <div class="slider-value">60%</div>
+                </div>
+                
+                <div>
+                    <div class="component-label">Large</div>
+                    <div class="slider slider-lg" data-value="85">
+                        <div class="slider-track">
+                            <div class="slider-fill" style="width: 85%;"></div>
+                            <div class="slider-thumb" style="left: 85%;"></div>
+                        </div>
+                    </div>
+                    <div class="slider-value">85%</div>
+                </div>
+            </div>
+            
+            <div class="component-group mt-4">
+                <div class="component-label">Disabled</div>
+                <div class="slider slider-md disabled" style="max-width: 300px;">
+                    <div class="slider-track">
+                        <div class="slider-fill" style="width: 50%;"></div>
+                        <div class="slider-thumb" style="left: 50%;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 6. MODAL -->
+        <section class="component-section">
+            <h2>Modal / Dialog</h2>
+            <p>Overlay dialogs with backdrop blur effect</p>
+            
+            <div class="demo-inline">
+                <button class="btn btn-md btn-primary" onclick="openModal('modal-sm')">Small Modal</button>
+                <button class="btn btn-md btn-secondary" onclick="openModal('modal-md')">Medium Modal</button>
+                <button class="btn btn-md btn-ghost" onclick="openModal('modal-lg')">Large Modal</button>
+            </div>
+            
+            <!-- Modal Small -->
+            <div class="modal-backdrop" id="modal-sm" onclick="closeModal('modal-sm', event)">
+                <div class="modal modal-sm" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Confirm Action</h3>
+                        <button class="modal-close" onclick="closeModal('modal-sm')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6 6 18M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete this item? This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-md btn-ghost" onclick="closeModal('modal-sm')">Cancel</button>
+                        <button class="btn btn-md btn-danger">Delete</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Medium -->
+            <div class="modal-backdrop" id="modal-md" onclick="closeModal('modal-md', event)">
+                <div class="modal modal-md" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Create New Bot</h3>
+                        <button class="modal-close" onclick="closeModal('modal-md')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6 6 18M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group mb-4">
+                            <label class="form-label form-label-required">Bot Name</label>
+                            <input type="text" class="input input-md" placeholder="My Awesome Bot">
+                        </div>
+                        <div class="form-group mb-4">
+                            <label class="form-label">Description</label>
+                            <textarea class="input textarea" placeholder="Describe what your bot does..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="toggle toggle-md">
+                                <input type="checkbox" class="toggle-input" checked>
+                                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                                <span class="toggle-label">Enable AI responses</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-md btn-ghost" onclick="closeModal('modal-md')">Cancel</button>
+                        <button class="btn btn-md btn-primary">Create Bot</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Large -->
+            <div class="modal-backdrop" id="modal-lg" onclick="closeModal('modal-lg', event)">
+                <div class="modal modal-lg" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Bot Analytics</h3>
+                        <button class="modal-close" onclick="closeModal('modal-lg')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6 6 18M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="demo-grid">
+                            <div class="card card-elevated">
+                                <div class="card-body">
+                                    <div class="text-tertiary" style="font-size: 0.875rem;">Total Messages</div>
+                                    <div style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">12,847</div>
+                                </div>
+                            </div>
+                            <div class="card card-elevated">
+                                <div class="card-body">
+                                    <div class="text-tertiary" style="font-size: 0.875rem;">Active Users</div>
+                                    <div style="font-size: 2rem; font-weight: 700; color: var(--color-success);">1,234</div>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="margin-top: var(--space-4); color: var(--text-secondary);">
+                            This is a larger modal that can contain more complex content like charts, tables, or detailed forms.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-md btn-ghost" onclick="closeModal('modal-lg')">Close</button>
+                        <button class="btn btn-md btn-primary">Export Report</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 7. TOAST / NOTIFICATIONS -->
+        <section class="component-section">
+            <h2>Toast / Notifications</h2>
+            <p>Non-intrusive notification messages</p>
+            
+            <div class="demo-inline mb-4">
+                <button class="btn btn-md btn-primary" onclick="showToast('success')">Success Toast</button>
+                <button class="btn btn-md btn-secondary" onclick="showToast('info')">Info Toast</button>
+                <button class="btn btn-md btn-ghost" onclick="showToast('warning')">Warning Toast</button>
+                <button class="btn btn-md btn-danger" onclick="showToast('error')">Error Toast</button>
+            </div>
+            
+            <!-- Static Toast Examples -->
+            <div class="demo-grid">
+                <div class="toast toast-success show" style="transform: none; position: relative;">
+                    <div class="toast-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">Success!</div>
+                        <div class="toast-message">Your changes have been saved successfully.</div>
+                    </div>
+                </div>
+                
+                <div class="toast toast-error show" style="transform: none; position: relative;">
+                    <div class="toast-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">Error</div>
+                        <div class="toast-message">Something went wrong. Please try again.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Toast Container -->
+            <div class="toast-container" id="toastContainer"></div>
+        </section>
+        
+        <!-- 8. BADGE -->
+        <section class="component-section">
+            <h2>Badge</h2>
+            <p>Small status indicators and count badges</p>
+            
+            <div class="component-group">
+                <div class="component-label">Variants</div>
+                <div class="demo-inline">
+                    <span class="badge badge-md badge-default">Default</span>
+                    <span class="badge badge-md badge-primary">Primary</span>
+                    <span class="badge badge-md badge-success">Success</span>
+                    <span class="badge badge-md badge-warning">Warning</span>
+                    <span class="badge badge-md badge-danger">Danger</span>
+                    <span class="badge badge-md badge-info">Info</span>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-label">Sizes</div>
+                <div class="demo-inline">
+                    <span class="badge badge-sm badge-primary">Small</span>
+                    <span class="badge badge-md badge-primary">Medium</span>
+                    <span class="badge badge-lg badge-primary">Large</span>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-label">With Dot</div>
+                <div class="demo-inline">
+                    <span class="badge badge-md badge-success badge-dot">Online</span>
+                    <span class="badge badge-md badge-warning badge-dot">Away</span>
+                    <span class="badge badge-md badge-danger badge-dot">Offline</span>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-label">Count Badges</div>
+                <div class="demo-inline">
+                    <button class="btn btn-md btn-secondary" style="position: relative;">
+                        Notifications
+                        <span class="badge badge-count badge-danger" style="position: absolute; top: -8px; right: -8px;">5</span>
+                    </button>
+                    <button class="btn btn-md btn-secondary" style="position: relative;">
+                        Messages
+                        <span class="badge badge-count badge-primary" style="position: absolute; top: -8px; right: -8px;">99+</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 9. AVATAR -->
+        <section class="component-section">
+            <h2>Avatar</h2>
+            <p>User avatars with image support and fallback initials</p>
+            
+            <div class="component-group">
+                <div class="component-label">Sizes</div>
+                <div class="demo-inline">
+                    <div class="avatar avatar-xs">XS</div>
+                    <div class="avatar avatar-sm">SM</div>
+                    <div class="avatar avatar-md">MD</div>
+                    <div class="avatar avatar-lg">LG</div>
+                    <div class="avatar avatar-xl">XL</div>
+                    <div class="avatar avatar-2xl">2X</div>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-label">With Status</div>
+                <div class="demo-inline">
+                    <div class="avatar avatar-lg">
+                        JD
+                        <span class="avatar-status avatar-status-online"></span>
+                    </div>
+                    <div class="avatar avatar-lg">
+                        AB
+                        <span class="avatar-status avatar-status-away"></span>
+                    </div>
+                    <div class="avatar avatar-lg">
+                        MK
+                        <span class="avatar-status avatar-status-busy"></span>
+                    </div>
+                    <div class="avatar avatar-lg">
+                        RS
+                        <span class="avatar-status avatar-status-offline"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-label">Avatar Group</div>
+                <div class="avatar-group">
+                    <div class="avatar avatar-md" style="background: linear-gradient(135deg, #ec4899, #f43f5e);">AM</div>
+                    <div class="avatar avatar-md" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">BR</div>
+                    <div class="avatar avatar-md" style="background: linear-gradient(135deg, #3b82f6, #6366f1);">CK</div>
+                    <div class="avatar avatar-md" style="background: linear-gradient(135deg, #10b981, #14b8a6);">DL</div>
+                    <div class="avatar avatar-md" style="background: var(--bg-tertiary); color: var(--text-secondary);">+5</div>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-label">Square Variant</div>
+                <div class="demo-inline">
+                    <div class="avatar avatar-md avatar-square">🤖</div>
+                    <div class="avatar avatar-md avatar-square" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">AI</div>
+                    <div class="avatar avatar-md avatar-square" style="background: var(--color-success);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 10. CARD -->
+        <section class="component-section">
+            <h2>Card</h2>
+            <p>Versatile container component with multiple variants</p>
+            
+            <div class="demo-grid">
+                <div class="card card-hover card-clickable">
+                    <div class="card-header">
+                        <div class="card-title">Default Card</div>
+                        <div class="card-subtitle">With hover effect</div>
+                    </div>
+                    <div class="card-body">
+                        <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                            This is a standard card with header, body, and hover animations.
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-sm btn-ghost">Learn More</button>
+                    </div>
+                </div>
+                
+                <div class="card card-elevated">
+                    <div class="card-body">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="avatar avatar-md">🤖</div>
+                            <div>
+                                <div class="card-title">Support Bot</div>
+                                <span class="badge badge-sm badge-success badge-dot">Active</span>
+                            </div>
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                            24/7 customer support automation with AI-powered responses.
+                        </p>
+                        <div class="flex justify-between mt-4" style="font-size: 0.8125rem; color: var(--text-tertiary);">
+                            <span>1,234 messages today</span>
+                            <span>98% satisfaction</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card card-gradient">
+                    <div class="card-body">
+                        <div style="font-size: 0.875rem; opacity: 0.8;">Total Revenue</div>
+                        <div style="font-size: 2rem; font-weight: 700; margin: var(--space-2) 0;">$48,574</div>
+                        <div style="font-size: 0.8125rem; opacity: 0.8;">
+                            <span style="color: #86efac;">↑ 12%</span> from last month
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 11. TABLE -->
+        <section class="component-section">
+            <h2>Table</h2>
+            <p>Data tables with sorting and pagination</p>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="sortable sorted">
+                                Bot Name
+                                <span class="sort-icon">↑</span>
+                            </th>
+                            <th class="sortable">Status</th>
+                            <th class="sortable">Messages</th>
+                            <th class="sortable">Users</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar avatar-sm avatar-square">🤖</div>
+                                    <div>
+                                        <div style="font-weight: 500;">Support Bot</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-tertiary);">support@company.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge badge-sm badge-success badge-dot">Active</span></td>
+                            <td>12,847</td>
+                            <td>1,234</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-sm btn-ghost btn-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-ghost btn-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar avatar-sm avatar-square" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">💬</div>
+                                    <div>
+                                        <div style="font-weight: 500;">Sales Assistant</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-tertiary);">sales@company.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge badge-sm badge-warning badge-dot">Paused</span></td>
+                            <td>8,421</td>
+                            <td>892</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-sm btn-ghost btn-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-ghost btn-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar avatar-sm avatar-square" style="background: linear-gradient(135deg, #10b981, #14b8a6);">📊</div>
+                                    <div>
+                                        <div style="font-weight: 500;">Analytics Bot</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-tertiary);">analytics@company.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge badge-sm badge-danger badge-dot">Offline</span></td>
+                            <td>3,156</td>
+                            <td>245</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-sm btn-ghost btn-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-ghost btn-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="table-pagination">
+                    <div class="table-pagination-info">
+                        Showing <strong>1-3</strong> of <strong>24</strong> results
+                    </div>
+                    <div class="table-pagination-controls">
+                        <button class="pagination-btn" disabled>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m15 18-6-6 6-6"/>
+                            </svg>
+                        </button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn">2</button>
+                        <button class="pagination-btn">3</button>
+                        <span style="color: var(--text-tertiary);">...</span>
+                        <button class="pagination-btn">8</button>
+                        <button class="pagination-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 12. TABS -->
+        <section class="component-section">
+            <h2>Tabs</h2>
+            <p>Tab navigation for organizing content</p>
+            
+            <div class="component-group">
+                <div class="component-label">Default Tabs</div>
+                <div class="tabs">
+                    <div class="tabs-list">
+                        <button class="tab active" onclick="switchTab(this)">Overview</button>
+                        <button class="tab" onclick="switchTab(this)">
+                            Analytics
+                            <span class="tab-badge">New</span>
+                        </button>
+                        <button class="tab" onclick="switchTab(this)">Settings</button>
+                        <button class="tab" disabled>Billing</button>
+                    </div>
+                    <div class="tab-content">
+                        <p style="color: var(--text-secondary);">Tab content appears here. Click tabs above to see the active state change.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-label">Pills Variant</div>
+                <div class="tabs tabs-pills">
+                    <div class="tabs-list">
+                        <button class="tab active" onclick="switchTab(this)">All Bots</button>
+                        <button class="tab" onclick="switchTab(this)">Active</button>
+                        <button class="tab" onclick="switchTab(this)">Paused</button>
+                        <button class="tab" onclick="switchTab(this)">Archived</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 13. TOOLTIP -->
+        <section class="component-section">
+            <h2>Tooltip</h2>
+            <p>Contextual information on hover</p>
+            
+            <div class="demo-inline" style="padding: var(--space-8);">
+                <div class="tooltip-wrapper">
+                    <button class="btn btn-md btn-secondary">Hover me (Top)</button>
+                    <div class="tooltip tooltip-top">Tooltip on top</div>
+                </div>
+                
+                <div class="tooltip-wrapper">
+                    <button class="btn btn-md btn-secondary">Hover me (Bottom)</button>
+                    <div class="tooltip tooltip-bottom">Tooltip on bottom</div>
+                </div>
+                
+                <div class="tooltip-wrapper">
+                    <button class="btn btn-md btn-secondary">Hover me (Left)</button>
+                    <div class="tooltip tooltip-left">Tooltip on left</div>
+                </div>
+                
+                <div class="tooltip-wrapper">
+                    <button class="btn btn-md btn-secondary">Hover me (Right)</button>
+                    <div class="tooltip tooltip-right">Tooltip on right</div>
+                </div>
+            </div>
+            
+            <div class="demo-inline mt-4">
+                <div class="tooltip-wrapper">
+                    <button class="btn btn-sm btn-icon btn-ghost">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </button>
+                    <div class="tooltip tooltip-top">Help & Documentation</div>
+                </div>
+                
+                <div class="tooltip-wrapper">
+                    <button class="btn btn-sm btn-icon btn-ghost">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                    <div class="tooltip tooltip-top">Settings</div>
+                </div>
+                
+                <div class="tooltip-wrapper">
+                    <div class="avatar avatar-md">JD</div>
+                    <div class="tooltip tooltip-bottom">John Doe • Online</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 14. SKELETON LOADER -->
+        <section class="component-section">
+            <h2>Skeleton Loader</h2>
+            <p>Loading placeholders for better UX</p>
+            
+            <div class="demo-grid">
+                <div class="skeleton-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div style="flex: 1;">
+                            <div class="skeleton skeleton-text" style="width: 60%;"></div>
+                            <div class="skeleton skeleton-text" style="width: 40%; height: 12px;"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text" style="width: 70%;"></div>
+                </div>
+                
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-image" style="margin: calc(var(--space-4) * -1); margin-bottom: var(--space-4); width: calc(100% + var(--space-8));"></div>
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="flex gap-2 mt-4">
+                        <div class="skeleton skeleton-button"></div>
+                        <div class="skeleton skeleton-button" style="width: 80px;"></div>
+                    </div>
+                </div>
+                
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-title" style="width: 40%;"></div>
+                    <div style="display: flex; gap: var(--space-4); margin-top: var(--space-4);">
+                        <div style="flex: 1;">
+                            <div class="skeleton" style="height: 80px;"></div>
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="skeleton" style="height: 80px;"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton skeleton-text mt-4"></div>
+                    <div class="skeleton skeleton-text"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 15. EMPTY STATE -->
+        <section class="component-section">
+            <h2>Empty State</h2>
+            <p>Placeholder content for empty data views</p>
+            
+            <div class="demo-grid">
+                <div class="card">
+                    <div class="empty-state" style="padding: var(--space-8);">
+                        <div class="empty-state-icon">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="3" y1="9" x2="21" y2="9"/>
+                                <line x1="9" y1="21" x2="9" y2="9"/>
+                            </svg>
+                        </div>
+                        <div class="empty-state-title">No bots yet</div>
+                        <div class="empty-state-description">
+                            Create your first bot to start automating conversations and engaging with customers.
+                        </div>
+                        <div class="empty-state-actions">
+                            <button class="btn btn-md btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                Create Bot
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="empty-state" style="padding: var(--space-8);">
+                        <div class="empty-state-icon">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                        </div>
+                        <div class="empty-state-title">No results found</div>
+                        <div class="empty-state-description">
+                            We couldn't find anything matching your search. Try different keywords or filters.
+                        </div>
+                        <div class="empty-state-actions">
+                            <button class="btn btn-md btn-secondary">Clear Filters</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer style="text-align: center; padding: var(--space-8); color: var(--text-tertiary); font-size: 0.875rem;">
+            <p>BaaS UI Kit v1.0 • Built with ❤️ for Bot-as-a-Service</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeToggle').checked = savedTheme === 'dark';
+        
+        // Dropdown Toggle
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById(id);
+            dropdown.classList.toggle('open');
+            
+            // Close on click outside
+            const closeDropdown = (e) => {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.classList.remove('open');
+                    document.removeEventListener('click', closeDropdown);
+                }
+            };
+            
+            setTimeout(() => document.addEventListener('click', closeDropdown), 0);
+        }
+        
+        // Modal Functions
+        function openModal(id) {
+            document.getElementById(id).classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal(id, event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById(id).classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        
+        // Tab Switching
+        function switchTab(el) {
+            const tabs = el.parentElement;
+            tabs.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            el.classList.add('active');
+        }
+        
+        // Toast System
+        let toastCounter = 0;
+        
+        function showToast(type) {
+            const container = document.getElementById('toastContainer');
+            const id = `toast-${++toastCounter}`;
+            
+            const icons = {
+                success: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+                info: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+                warning: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+                error: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+            };
+            
+            const titles = {
+                success: 'Success!',
+                info: 'Information',
+                warning: 'Warning',
+                error: 'Error'
+            };
+            
+            const messages = {
+                success: 'Your action was completed successfully.',
+                info: 'Here is some useful information for you.',
+                warning: 'Please review this before proceeding.',
+                error: 'Something went wrong. Please try again.'
+            };
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.id = id;
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type]}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${titles[type]}</div>
+                    <div class="toast-message">${messages[type]}</div>
+                </div>
+                <button class="toast-close" onclick="removeToast('${id}')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6 6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+                <div class="toast-progress"></div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Auto remove after 5s
+            setTimeout(() => removeToast(id), 5000);
+        }
+        
+        function removeToast(id) {
+            const toast = document.getElementById(id);
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }
+        }
+        
+        // Slider Interaction (Basic)
+        document.querySelectorAll('.slider:not(.disabled)').forEach(slider => {
+            const track = slider.querySelector('.slider-track');
+            const fill = slider.querySelector('.slider-fill');
+            const thumb = slider.querySelector('.slider-thumb');
+            const valueDisplay = slider.nextElementSibling;
+            
+            let isDragging = false;
+            
+            const updateSlider = (e) => {
+                const rect = track.getBoundingClientRect();
+                let percent = ((e.clientX - rect.left) / rect.width) * 100;
+                percent = Math.max(0, Math.min(100, percent));
+                
+                fill.style.width = percent + '%';
+                thumb.style.left = percent + '%';
+                if (valueDisplay && valueDisplay.classList.contains('slider-value')) {
+                    valueDisplay.textContent = Math.round(percent) + '%';
+                }
+            };
+            
+            thumb.addEventListener('mousedown', () => {
+                isDragging = true;
+                document.body.style.userSelect = 'none';
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) updateSlider(e);
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                document.body.style.userSelect = '';
+            });
+            
+            track.addEventListener('click', updateSlider);
+        });
+    </script>
+</body>
+</html>

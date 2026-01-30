@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comportamento & Personalidade - BaaS Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Sidebar */
+        .sidebar-item:hover { background: rgba(99, 102, 241, 0.08); }
+        .sidebar-item.active { 
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.12) 0%, transparent 100%); 
+            border-right: 3px solid #6366f1; 
+        }
+        
+        /* Custom Slider */
+        .custom-slider {
+            position: relative;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+        .slider-track {
+            position: absolute;
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .slider-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
+            border-radius: 4px;
+            transition: width 0.15s ease;
+        }
+        .slider-thumb {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border: 3px solid #6366f1;
+            border-radius: 50%;
+            cursor: grab;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+            transition: transform 0.1s, box-shadow 0.1s;
+            z-index: 10;
+        }
+        .slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        .slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.15);
+        }
+        .slider-thumb::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e1b4b;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.15s;
+            white-space: nowrap;
+        }
+        .slider-thumb:hover::after,
+        .slider-thumb:active::after {
+            opacity: 1;
+        }
+        
+        /* Template Cards */
+        .template-card {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+        }
+        .template-card.selected {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+        }
+        .template-card.selected::before {
+            content: '✓';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            background: #6366f1;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        /* Specialist Cards */
+        .specialist-card {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .specialist-card:hover {
+            background: #f8fafc;
+            border-color: #c7d2fe;
+        }
+        .specialist-card.active {
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            border-color: #6366f1;
+        }
+        .specialist-card.active .specialist-icon {
+            background: #6366f1;
+            color: white;
+        }
+        
+        /* Code Editor */
+        .code-editor {
+            font-family: 'JetBrains Mono', monospace;
+            background: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .code-editor:focus {
+            outline: none;
+        }
+        .code-keyword { color: #c084fc; }
+        .code-string { color: #86efac; }
+        .code-variable { color: #67e8f9; }
+        .code-comment { color: #64748b; font-style: italic; }
+        
+        /* Chat Bubbles */
+        .chat-bubble-user {
+            background: #f1f5f9;
+            border-radius: 18px 18px 4px 18px;
+        }
+        .chat-bubble-bot {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: 18px 18px 18px 4px;
+        }
+        
+        /* Unsaved Indicator */
+        .unsaved-dot {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Save Button Animation */
+        .save-btn.saving {
+            pointer-events: none;
+        }
+        .save-btn.saved {
+            background: #10b981 !important;
+        }
+        
+        /* Typing Animation */
+        .typing-indicator span {
+            animation: typing 1.4s infinite;
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 50%;
+            margin: 0 2px;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-6px); }
+        }
+        
+        /* Suggested Questions */
+        .suggested-q {
+            transition: all 0.15s;
+        }
+        .suggested-q:hover {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-slate-200 flex flex-col flex-shrink-0">
+            <div class="p-6 border-b border-slate-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25">
+                        <span class="text-white text-xl">🤖</span>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-slate-900">BaaS</h1>
+                        <p class="text-xs text-slate-500">Brand Voice AI</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex-1 p-4 overflow-y-auto">
+                <ul class="space-y-1">
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-slate-600">
+                        <span>🏠</span> Overview
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-slate-600">
+                        <span>📱</span> Grupos & Canais
+                    </li>
+                    <li class="sidebar-item active rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-indigo-600 font-medium">
+                        <span>🎭</span> Comportamento
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-slate-600">
+                        <span>⚡</span> Funcionalidades
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-slate-600">
+                        <span>🔌</span> Integrações
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-slate-600">
+                        <span>💰</span> Billing
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-slate-600">
+                        <span>⚙️</span> Admin
+                    </li>
+                </ul>
+            </nav>
+            <div class="p-4 border-t border-slate-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">L</div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-900">Liqi</p>
+                        <p class="text-xs text-slate-500">Business Plan</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between flex-shrink-0">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-xl font-semibold text-slate-900">Comportamento & Personalidade</h2>
+                        <span id="unsavedIndicator" class="hidden items-center gap-2 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-medium">
+                            <span class="w-2 h-2 bg-amber-500 rounded-full unsaved-dot"></span>
+                            Alterações não salvas
+                        </span>
+                    </div>
+                    <p class="text-sm text-slate-500">Configure a personalidade e tom de voz do seu assistente</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button class="px-4 py-2 text-slate-600 hover:text-slate-900 text-sm font-medium" onclick="resetChanges()">
+                        Descartar
+                    </button>
+                    <button id="saveBtn" onclick="saveConfig()" class="save-btn px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/25">
+                        <svg id="saveIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span id="saveBtnText">Salvar Configurações</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto">
+                <div class="p-8 max-w-[1600px] mx-auto">
+                    <!-- Two Column Layout -->
+                    <div class="grid grid-cols-12 gap-8">
+                        
+                        <!-- Left Column: Configuration -->
+                        <div class="col-span-7 space-y-8">
+                            
+                            <!-- Template Picker -->
+                            <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                                <div class="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h3 class="font-semibold text-slate-900 text-lg">Template de Personalidade</h3>
+                                        <p class="text-sm text-slate-500 mt-1">Escolha um ponto de partida ou crie do zero</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <!-- Template 1: Fintech -->
+                                    <div class="template-card selected relative border-2 border-slate-200 rounded-2xl p-5 hover:border-indigo-300" onclick="selectTemplate(this, 'fintech')">
+                                        <div class="flex items-start gap-4">
+                                            <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-2xl shadow-lg shadow-indigo-500/20">
+                                                🏦
+                                            </div>
+                                            <div class="flex-1">
+                                                <h4 class="font-semibold text-slate-900">Fintech Técnico</h4>
+                                                <p class="text-sm text-slate-500 mt-1">Formal, preciso, usa terminologia financeira. Ideal para bancos e fintechs.</p>
+                                                <div class="flex gap-2 mt-3">
+                                                    <span class="px-2 py-1 bg-blue-50 text-blue-600 rounded text-xs font-medium">Formal</span>
+                                                    <span class="px-2 py-1 bg-purple-50 text-purple-600 rounded text-xs font-medium">Técnico</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4 p-3 bg-slate-50 rounded-xl text-sm text-slate-600 italic">
+                                            "A liquidação da operação será processada em D+2, conforme as normas do BACEN..."
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Template 2: E-commerce -->
+                                    <div class="template-card relative border-2 border-slate-200 rounded-2xl p-5 hover:border-indigo-300" onclick="selectTemplate(this, 'ecommerce')">
+                                        <div class="flex items-start gap-4">
+                                            <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-2xl shadow-lg shadow-emerald-500/20">
+                                                🛒
+                                            </div>
+                                            <div class="flex-1">
+                                                <h4 class="font-semibold text-slate-900">E-commerce Friendly</h4>
+                                                <p class="text-sm text-slate-500 mt-1">Amigável, focado em vendas e suporte. Resolve dúvidas rapidamente.</p>
+                                                <div class="flex gap-2 mt-3">
+                                                    <span class="px-2 py-1 bg-emerald-50 text-emerald-600 rounded text-xs font-medium">Casual</span>
+                                                    <span class="px-2 py-1 bg-amber-50 text-amber-600 rounded text-xs font-medium">Proativo</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4 p-3 bg-slate-50 rounded-xl text-sm text-slate-600 italic">
+                                            "Oi! 👋 Vi que você tá de olho no produto X. Quer que eu te conte sobre..."
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Template 3: Consultoria -->
+                                    <div class="template-card relative border-2 border-slate-200 rounded-2xl p-5 hover:border-indigo-300" onclick="selectTemplate(this, 'consultoria')">
+                                        <div class="flex items-start gap-4">
+                                            <div class="w-14 h-14 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-lg shadow-purple-500/20">
+                                                💼
+                                            </div>
+                                            <div class="flex-1">
+                                                <h4 class="font-semibold text-slate-900">Consultoria Expert</h4>
+                                                <p class="text-sm text-slate-500 mt-1">Profissional, analítico, usa dados e insights. Recomenda soluções.</p>
+                                                <div class="flex gap-2 mt-3">
+                                                    <span class="px-2 py-1 bg-violet-50 text-violet-600 rounded text-xs font-medium">Analítico</span>
+                                                    <span class="px-2 py-1 bg-pink-50 text-pink-600 rounded text-xs font-medium">Empático</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4 p-3 bg-slate-50 rounded-xl text-sm text-slate-600 italic">
+                                            "Com base nos dados apresentados, identifico 3 oportunidades de melhoria..."
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Template 4: Custom -->
+                                    <div class="template-card relative border-2 border-slate-200 rounded-2xl p-5 hover:border-indigo-300 border-dashed" onclick="selectTemplate(this, 'custom')">
+                                        <div class="flex items-start gap-4">
+                                            <div class="w-14 h-14 bg-gradient-to-br from-slate-400 to-slate-500 rounded-xl flex items-center justify-center text-2xl shadow-lg shadow-slate-500/20">
+                                                ✨
+                                            </div>
+                                            <div class="flex-1">
+                                                <h4 class="font-semibold text-slate-900">Personalizado</h4>
+                                                <p class="text-sm text-slate-500 mt-1">Configure cada aspecto manualmente para criar uma personalidade única.</p>
+                                                <div class="flex gap-2 mt-3">
+                                                    <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium">Flexível</span>
+                                                    <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium">Seu estilo</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4 p-3 bg-slate-50 rounded-xl text-sm text-slate-600 flex items-center justify-center gap-2">
+                                            <span class="text-slate-400">+</span> Começar do zero
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Personality Sliders -->
+                            <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                                <div class="mb-6">
+                                    <h3 class="font-semibold text-slate-900 text-lg">Ajuste Fino de Personalidade</h3>
+                                    <p class="text-sm text-slate-500 mt-1">Use os controles para calibrar cada dimensão</p>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-x-10 gap-y-8">
+                                    <!-- Formalidade -->
+                                    <div class="slider-container" data-slider="formalidade">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">🎩</span>
+                                                <label class="text-sm font-semibold text-slate-700">Formalidade</label>
+                                            </div>
+                                            <span class="slider-value px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold">75%</span>
+                                        </div>
+                                        <div class="custom-slider" data-value="75">
+                                            <div class="slider-track">
+                                                <div class="slider-fill" style="width: 75%"></div>
+                                            </div>
+                                            <div class="slider-thumb" style="left: calc(75% - 12px)" data-value="Formal"></div>
+                                        </div>
+                                        <div class="flex justify-between text-xs text-slate-400 mt-2">
+                                            <span>😎 Casual</span>
+                                            <span>🎩 Formal</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Tecnicidade -->
+                                    <div class="slider-container" data-slider="tecnicidade">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">🔬</span>
+                                                <label class="text-sm font-semibold text-slate-700">Tecnicidade</label>
+                                            </div>
+                                            <span class="slider-value px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold">85%</span>
+                                        </div>
+                                        <div class="custom-slider" data-value="85">
+                                            <div class="slider-track">
+                                                <div class="slider-fill" style="width: 85%"></div>
+                                            </div>
+                                            <div class="slider-thumb" style="left: calc(85% - 12px)" data-value="Técnico"></div>
+                                        </div>
+                                        <div class="flex justify-between text-xs text-slate-400 mt-2">
+                                            <span>📝 Simples</span>
+                                            <span>🔬 Técnico</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Proatividade -->
+                                    <div class="slider-container" data-slider="proatividade">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">🚀</span>
+                                                <label class="text-sm font-semibold text-slate-700">Proatividade</label>
+                                            </div>
+                                            <span class="slider-value px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold">40%</span>
+                                        </div>
+                                        <div class="custom-slider" data-value="40">
+                                            <div class="slider-track">
+                                                <div class="slider-fill" style="width: 40%"></div>
+                                            </div>
+                                            <div class="slider-thumb" style="left: calc(40% - 12px)" data-value="Moderado"></div>
+                                        </div>
+                                        <div class="flex justify-between text-xs text-slate-400 mt-2">
+                                            <span>🎯 Reativo</span>
+                                            <span>🚀 Proativo</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Empatia -->
+                                    <div class="slider-container" data-slider="empatia">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-8 h-8 bg-rose-100 rounded-lg flex items-center justify-center">💖</span>
+                                                <label class="text-sm font-semibold text-slate-700">Empatia</label>
+                                            </div>
+                                            <span class="slider-value px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold">65%</span>
+                                        </div>
+                                        <div class="custom-slider" data-value="65">
+                                            <div class="slider-track">
+                                                <div class="slider-fill" style="width: 65%"></div>
+                                            </div>
+                                            <div class="slider-thumb" style="left: calc(65% - 12px)" data-value="Empático"></div>
+                                        </div>
+                                        <div class="flex justify-between text-xs text-slate-400 mt-2">
+                                            <span>📊 Direto</span>
+                                            <span>💖 Empático</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Specialists -->
+                            <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                                <div class="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h3 class="font-semibold text-slate-900 text-lg">Especialistas Disponíveis</h3>
+                                        <p class="text-sm text-slate-500 mt-1">Ative modos especializados com /comandos</p>
+                                    </div>
+                                    <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-medium">3 ativos</span>
+                                </div>
+                                
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div class="specialist-card active border border-slate-200 rounded-xl p-4" onclick="toggleSpecialist(this)">
+                                        <div class="specialist-icon w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-lg mb-3">💻</div>
+                                        <h4 class="font-medium text-slate-900 text-sm">/code</h4>
+                                        <p class="text-xs text-slate-500 mt-1">Análise e geração de código</p>
+                                    </div>
+                                    <div class="specialist-card active border border-slate-200 rounded-xl p-4" onclick="toggleSpecialist(this)">
+                                        <div class="specialist-icon w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-lg mb-3">📊</div>
+                                        <h4 class="font-medium text-slate-900 text-sm">/data</h4>
+                                        <p class="text-xs text-slate-500 mt-1">Análise de dados e métricas</p>
+                                    </div>
+                                    <div class="specialist-card active border border-slate-200 rounded-xl p-4" onclick="toggleSpecialist(this)">
+                                        <div class="specialist-icon w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-lg mb-3">✍️</div>
+                                        <h4 class="font-medium text-slate-900 text-sm">/write</h4>
+                                        <p class="text-xs text-slate-500 mt-1">Redação e copywriting</p>
+                                    </div>
+                                    <div class="specialist-card border border-slate-200 rounded-xl p-4" onclick="toggleSpecialist(this)">
+                                        <div class="specialist-icon w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-lg mb-3">🔍</div>
+                                        <h4 class="font-medium text-slate-900 text-sm">/research</h4>
+                                        <p class="text-xs text-slate-500 mt-1">Pesquisa aprofundada</p>
+                                    </div>
+                                    <div class="specialist-card border border-slate-200 rounded-xl p-4" onclick="toggleSpecialist(this)">
+                                        <div class="specialist-icon w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-lg mb-3">🎨</div>
+                                        <h4 class="font-medium text-slate-900 text-sm">/design</h4>
+                                        <p class="text-xs text-slate-500 mt-1">Sugestões visuais e UX</p>
+                                    </div>
+                                    <div class="specialist-card border border-slate-200 rounded-xl p-4" onclick="toggleSpecialist(this)">
+                                        <div class="specialist-icon w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-lg mb-3">📈</div>
+                                        <h4 class="font-medium text-slate-900 text-sm">/strategy</h4>
+                                        <p class="text-xs text-slate-500 mt-1">Planejamento estratégico</p>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- System Prompt Editor -->
+                            <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h3 class="font-semibold text-slate-900 text-lg">System Prompt</h3>
+                                        <p class="text-sm text-slate-500 mt-1">Instruções detalhadas para o comportamento do bot</p>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="px-3 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-medium border border-slate-200 rounded-lg hover:bg-slate-50">
+                                            📋 Copiar
+                                        </button>
+                                        <button class="px-3 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-medium border border-slate-200 rounded-lg hover:bg-slate-50">
+                                            ↺ Resetar
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="relative rounded-xl overflow-hidden border border-slate-700">
+                                    <!-- Editor Header -->
+                                    <div class="bg-slate-800 px-4 py-2 flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex gap-1.5">
+                                                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                            </div>
+                                            <span class="text-slate-400 text-xs ml-3">system-prompt.md</span>
+                                        </div>
+                                        <span class="text-slate-500 text-xs">Markdown</span>
+                                    </div>
+                                    
+                                    <!-- Editor Content -->
+                                    <div class="relative">
+                                        <div class="absolute left-0 top-0 bottom-0 w-12 bg-slate-800/50 flex flex-col items-end pr-3 pt-4 text-slate-500 text-xs font-mono select-none">
+                                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span>
+                                        </div>
+                                        <textarea id="systemPrompt" class="code-editor w-full h-64 p-4 pl-14 resize-none text-sm" spellcheck="false" oninput="markUnsaved()">## Identidade
+Você é **Lobo**, assistente de IA da Liqi.
+
+## Papel
+Ajudar a equipe com informações sobre:
+- Tokenização de ativos
+- Mercado de capitais
+- Operações da empresa
+
+## Tom de Voz
+- Seja técnico mas acessível
+- Use dados quando disponíveis
+- Mantenha tom profissional
+- Responda em português</textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-4 mt-3 text-xs text-slate-400">
+                                    <span>💡 Use **negrito** e - listas para estruturar</span>
+                                    <span>•</span>
+                                    <span>Tokens: ~156</span>
+                                </div>
+                            </section>
+                        </div>
+
+                        <!-- Right Column: Sandbox & Preview -->
+                        <div class="col-span-5 space-y-6">
+                            
+                            <!-- Interactive Sandbox -->
+                            <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden sticky top-8">
+                                <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur">
+                                                <span class="text-white text-lg">💬</span>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-semibold text-white">Sandbox Interativa</h3>
+                                                <p class="text-indigo-200 text-xs">Teste sua configuração em tempo real</p>
+                                            </div>
+                                        </div>
+                                        <button onclick="clearChat()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs rounded-lg transition">
+                                            🗑️ Limpar
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Chat Area -->
+                                <div id="chatArea" class="h-80 overflow-y-auto p-4 space-y-4 bg-slate-50">
+                                    <!-- Welcome Message -->
+                                    <div class="flex gap-3">
+                                        <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <span class="text-white text-sm">🐺</span>
+                                        </div>
+                                        <div class="chat-bubble-bot px-4 py-3 max-w-[85%]">
+                                            <p class="text-sm">Olá! Sou o Lobo, assistente da Liqi. Estou configurado com as definições atuais. Faça uma pergunta para testar minha personalidade!</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Suggested Questions -->
+                                <div class="px-4 py-3 border-t border-slate-100 bg-white">
+                                    <p class="text-xs text-slate-400 mb-2">Sugestões de teste:</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button onclick="askQuestion(this.textContent)" class="suggested-q px-3 py-1.5 border border-slate-200 rounded-full text-xs text-slate-600 hover:bg-slate-50 transition">
+                                            Como funciona tokenização?
+                                        </button>
+                                        <button onclick="askQuestion(this.textContent)" class="suggested-q px-3 py-1.5 border border-slate-200 rounded-full text-xs text-slate-600 hover:bg-slate-50 transition">
+                                            Quais são os riscos?
+                                        </button>
+                                        <button onclick="askQuestion(this.textContent)" class="suggested-q px-3 py-1.5 border border-slate-200 rounded-full text-xs text-slate-600 hover:bg-slate-50 transition">
+                                            Me explica como se eu tivesse 5 anos
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Input Area -->
+                                <div class="px-4 py-3 border-t border-slate-200 bg-white">
+                                    <div class="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            id="chatInput" 
+                                            placeholder="Digite uma mensagem para testar..."
+                                            class="flex-1 px-4 py-3 bg-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
+                                            onkeypress="if(event.key === 'Enter') sendMessage()"
+                                        >
+                                        <button 
+                                            onclick="sendMessage()" 
+                                            class="px-5 py-3 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition flex items-center gap-2"
+                                        >
+                                            Testar
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Current Config Summary -->
+                            <section class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-white">
+                                <h4 class="font-semibold mb-4 flex items-center gap-2">
+                                    <span class="text-lg">📊</span> Resumo da Configuração
+                                </h4>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-400 text-sm">Template</span>
+                                        <span class="text-sm font-medium" id="summaryTemplate">Fintech Técnico</span>
+                                    </div>
+                                    <div class="h-px bg-slate-700"></div>
+                                    <div class="grid grid-cols-2 gap-3 text-sm">
+                                        <div class="bg-slate-700/50 rounded-lg p-3">
+                                            <span class="text-slate-400 text-xs block">Formalidade</span>
+                                            <span class="font-semibold" id="summaryFormalidade">75%</span>
+                                            <div class="w-full h-1 bg-slate-600 rounded mt-1"><div class="h-1 bg-indigo-500 rounded" style="width: 75%"></div></div>
+                                        </div>
+                                        <div class="bg-slate-700/50 rounded-lg p-3">
+                                            <span class="text-slate-400 text-xs block">Tecnicidade</span>
+                                            <span class="font-semibold" id="summaryTecnicidade">85%</span>
+                                            <div class="w-full h-1 bg-slate-600 rounded mt-1"><div class="h-1 bg-purple-500 rounded" style="width: 85%"></div></div>
+                                        </div>
+                                        <div class="bg-slate-700/50 rounded-lg p-3">
+                                            <span class="text-slate-400 text-xs block">Proatividade</span>
+                                            <span class="font-semibold" id="summaryProatividade">40%</span>
+                                            <div class="w-full h-1 bg-slate-600 rounded mt-1"><div class="h-1 bg-amber-500 rounded" style="width: 40%"></div></div>
+                                        </div>
+                                        <div class="bg-slate-700/50 rounded-lg p-3">
+                                            <span class="text-slate-400 text-xs block">Empatia</span>
+                                            <span class="font-semibold" id="summaryEmpatia">65%</span>
+                                            <div class="w-full h-1 bg-slate-600 rounded mt-1"><div class="h-1 bg-rose-500 rounded" style="width: 65%"></div></div>
+                                        </div>
+                                    </div>
+                                    <div class="h-px bg-slate-700"></div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-400 text-sm">Especialistas ativos</span>
+                                        <div class="flex gap-1">
+                                            <span class="px-2 py-0.5 bg-indigo-500/30 text-indigo-300 rounded text-xs">/code</span>
+                                            <span class="px-2 py-0.5 bg-indigo-500/30 text-indigo-300 rounded text-xs">/data</span>
+                                            <span class="px-2 py-0.5 bg-indigo-500/30 text-indigo-300 rounded text-xs">/write</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Tips -->
+                            <section class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+                                <div class="flex gap-3">
+                                    <span class="text-2xl">💡</span>
+                                    <div>
+                                        <h4 class="font-medium text-amber-900">Dica Pro</h4>
+                                        <p class="text-sm text-amber-700 mt-1">
+                                            Teste várias perguntas diferentes na sandbox para garantir que a personalidade está calibrada. Perguntas técnicas e emocionais revelam diferentes aspectos.
+                                        </p>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Save Success Toast -->
+    <div id="saveToast" class="fixed bottom-8 right-8 bg-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 opacity-0 translate-y-4 transition-all duration-300 pointer-events-none">
+        <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">✓</div>
+        <div>
+            <p class="font-semibold">Configurações salvas!</p>
+            <p class="text-emerald-200 text-sm">Alterações aplicadas com sucesso</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration state
+        let configState = {
+            template: 'fintech',
+            sliders: {
+                formalidade: 75,
+                tecnicidade: 85,
+                proatividade: 40,
+                empatia: 65
+            },
+            specialists: ['code', 'data', 'write'],
+            systemPrompt: '',
+            hasUnsavedChanges: false
+        };
+
+        // Sample responses based on configuration
+        const sampleResponses = {
+            'Como funciona tokenização?': {
+                formal: 'A tokenização de ativos consiste no processo de representação digital de direitos sobre ativos reais através de tokens em blockchain. Na Liqi, operamos com a emissão de tokens que representam frações de recebíveis, imóveis e outros ativos, seguindo as diretrizes regulatórias da CVM e BACEN.',
+                casual: 'Tokenização é basicamente pegar algo do mundo real (tipo um imóvel ou dívida) e criar uma versão digital dele que pode ser dividida e negociada. Imagina poder comprar 1% de um apartamento ao invés do apartamento inteiro 🏠'
+            },
+            'Quais são os riscos?': {
+                formal: 'Os principais riscos associados à tokenização incluem: (1) risco de crédito do ativo subjacente, (2) risco de liquidez do mercado secundário, (3) risco regulatório e (4) riscos tecnológicos inerentes à infraestrutura blockchain. Cada operação estruturada pela Liqi passa por análise de risco detalhada.',
+                casual: 'Todo investimento tem riscos, né? Nos tokens, os principais são: o devedor não pagar, não conseguir vender quando quiser, mudanças nas regras do jogo, e questões técnicas. Mas a gente analisa tudo antes de colocar no ar!'
+            },
+            'Me explica como se eu tivesse 5 anos': {
+                formal: 'Permita-me simplificar: imagine que você tem um bolo grande. A tokenização é como dividir esse bolo em muitos pedacinhos pequenos, e cada pedacinho é um "token". Assim, várias pessoas podem ter um pedacinho do bolo, em vez de só uma pessoa ter o bolo inteiro.',
+                casual: 'Imagina que você tem um bolo GIGANTE 🎂 Você sozinho não consegue comer tudo, né? Então a gente corta em pedacinhos e deixa outras pessoas comprarem um pedacinho. Token é tipo o papelzinho que prova que aquele pedaço é seu!'
+            }
+        };
+
+        // Initialize sliders
+        document.querySelectorAll('.custom-slider').forEach(slider => {
+            const thumb = slider.querySelector('.slider-thumb');
+            const fill = slider.querySelector('.slider-fill');
+            const container = slider.closest('.slider-container');
+            const valueDisplay = container.querySelector('.slider-value');
+            let isDragging = false;
+
+            const updateSlider = (e, slider) => {
+                const rect = slider.getBoundingClientRect();
+                let x = (e.clientX || e.touches[0].clientX) - rect.left;
+                let percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                percentage = Math.round(percentage);
+
+                thumb.style.left = `calc(${percentage}% - 12px)`;
+                fill.style.width = `${percentage}%`;
+                valueDisplay.textContent = `${percentage}%`;
+                
+                // Update thumb tooltip
+                if (percentage < 25) thumb.dataset.value = 'Muito baixo';
+                else if (percentage < 50) thumb.dataset.value = 'Baixo';
+                else if (percentage < 75) thumb.dataset.value = 'Moderado';
+                else thumb.dataset.value = 'Alto';
+
+                // Update config state
+                const sliderName = container.dataset.slider;
+                configState.sliders[sliderName] = percentage;
+                markUnsaved();
+                updateSummary();
+            };
+
+            thumb.addEventListener('mousedown', () => isDragging = true);
+            document.addEventListener('mouseup', () => isDragging = false);
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) updateSlider(e, slider);
+            });
+
+            // Touch support
+            thumb.addEventListener('touchstart', () => isDragging = true);
+            document.addEventListener('touchend', () => isDragging = false);
+            document.addEventListener('touchmove', (e) => {
+                if (isDragging) updateSlider(e, slider);
+            });
+
+            // Click to set
+            slider.addEventListener('click', (e) => updateSlider(e, slider));
+        });
+
+        // Template selection
+        function selectTemplate(element, templateName) {
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            configState.template = templateName;
+            markUnsaved();
+            updateSummary();
+
+            // Update sliders based on template
+            const templates = {
+                fintech: { formalidade: 75, tecnicidade: 85, proatividade: 40, empatia: 65 },
+                ecommerce: { formalidade: 30, tecnicidade: 25, proatividade: 80, empatia: 85 },
+                consultoria: { formalidade: 60, tecnicidade: 70, proatividade: 55, empatia: 75 },
+                custom: { formalidade: 50, tecnicidade: 50, proatividade: 50, empatia: 50 }
+            };
+
+            if (templates[templateName]) {
+                Object.entries(templates[templateName]).forEach(([key, value]) => {
+                    const container = document.querySelector(`[data-slider="${key}"]`);
+                    if (container) {
+                        const slider = container.querySelector('.custom-slider');
+                        const thumb = slider.querySelector('.slider-thumb');
+                        const fill = slider.querySelector('.slider-fill');
+                        const valueDisplay = container.querySelector('.slider-value');
+                        
+                        thumb.style.left = `calc(${value}% - 12px)`;
+                        fill.style.width = `${value}%`;
+                        valueDisplay.textContent = `${value}%`;
+                        configState.sliders[key] = value;
+                    }
+                });
+                updateSummary();
+            }
+        }
+
+        // Specialist toggle
+        function toggleSpecialist(element) {
+            element.classList.toggle('active');
+            markUnsaved();
+        }
+
+        // Mark unsaved changes
+        function markUnsaved() {
+            configState.hasUnsavedChanges = true;
+            document.getElementById('unsavedIndicator').classList.remove('hidden');
+            document.getElementById('unsavedIndicator').classList.add('flex');
+        }
+
+        // Reset changes
+        function resetChanges() {
+            location.reload();
+        }
+
+        // Update summary panel
+        function updateSummary() {
+            const templateNames = {
+                fintech: 'Fintech Técnico',
+                ecommerce: 'E-commerce Friendly',
+                consultoria: 'Consultoria Expert',
+                custom: 'Personalizado'
+            };
+            
+            document.getElementById('summaryTemplate').textContent = templateNames[configState.template] || 'Personalizado';
+            document.getElementById('summaryFormalidade').textContent = configState.sliders.formalidade + '%';
+            document.getElementById('summaryTecnicidade').textContent = configState.sliders.tecnicidade + '%';
+            document.getElementById('summaryProatividade').textContent = configState.sliders.proatividade + '%';
+            document.getElementById('summaryEmpatia').textContent = configState.sliders.empatia + '%';
+        }
+
+        // Save configuration
+        function saveConfig() {
+            const btn = document.getElementById('saveBtn');
+            const btnText = document.getElementById('saveBtnText');
+            const icon = document.getElementById('saveIcon');
+            
+            // Saving state
+            btn.classList.add('saving');
+            btnText.textContent = 'Salvando...';
+            icon.innerHTML = '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="20" stroke-dashoffset="0"><animate attributeName="stroke-dashoffset" values="0;60" dur="1s" repeatCount="indefinite"/></circle>';
+            
+            // Simulate save
+            setTimeout(() => {
+                btn.classList.remove('saving');
+                btn.classList.add('saved');
+                btnText.textContent = 'Salvo!';
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
+                
+                // Show toast
+                const toast = document.getElementById('saveToast');
+                toast.classList.remove('opacity-0', 'translate-y-4');
+                
+                // Hide unsaved indicator
+                document.getElementById('unsavedIndicator').classList.add('hidden');
+                configState.hasUnsavedChanges = false;
+                
+                // Reset button after delay
+                setTimeout(() => {
+                    btn.classList.remove('saved');
+                    btnText.textContent = 'Salvar Configurações';
+                    toast.classList.add('opacity-0', 'translate-y-4');
+                }, 3000);
+            }, 1500);
+        }
+
+        // Chat functionality
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            addUserMessage(message);
+            input.value = '';
+            
+            // Show typing indicator
+            showTyping();
+            
+            // Generate response after delay
+            setTimeout(() => {
+                hideTyping();
+                generateResponse(message);
+            }, 1500 + Math.random() * 1000);
+        }
+
+        function askQuestion(question) {
+            document.getElementById('chatInput').value = question;
+            sendMessage();
+        }
+
+        function addUserMessage(message) {
+            const chatArea = document.getElementById('chatArea');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'flex gap-3 justify-end';
+            msgDiv.innerHTML = `
+                <div class="chat-bubble-user px-4 py-3 max-w-[85%]">
+                    <p class="text-sm text-slate-700">${message}</p>
+                </div>
+                <div class="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span class="text-slate-600 text-sm">👤</span>
+                </div>
+            `;
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function showTyping() {
+            const chatArea = document.getElementById('chatArea');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'flex gap-3';
+            typingDiv.innerHTML = `
+                <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span class="text-white text-sm">🐺</span>
+                </div>
+                <div class="chat-bubble-bot px-4 py-3">
+                    <div class="typing-indicator flex items-center gap-1">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            `;
+            chatArea.appendChild(typingDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+        }
+
+        function generateResponse(userMessage) {
+            const chatArea = document.getElementById('chatArea');
+            const formalidade = configState.sliders.formalidade;
+            
+            // Check if we have a canned response
+            let response = '';
+            if (sampleResponses[userMessage]) {
+                response = formalidade > 50 
+                    ? sampleResponses[userMessage].formal 
+                    : sampleResponses[userMessage].casual;
+            } else {
+                // Generate dynamic response based on settings
+                const intro = formalidade > 60 
+                    ? 'Essa é uma excelente questão. ' 
+                    : 'Boa pergunta! ';
+                
+                const style = configState.sliders.tecnicidade > 60
+                    ? 'Do ponto de vista técnico, '
+                    : 'Basicamente, ';
+                
+                const closing = configState.sliders.empatia > 50
+                    ? ' Fico à disposição para esclarecer qualquer dúvida adicional.'
+                    : '';
+                
+                response = `${intro}${style}posso ajudar você com "${userMessage.substring(0, 30)}...". ${closing}`;
+            }
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'flex gap-3';
+            msgDiv.innerHTML = `
+                <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span class="text-white text-sm">🐺</span>
+                </div>
+                <div class="chat-bubble-bot px-4 py-3 max-w-[85%]">
+                    <p class="text-sm">${response}</p>
+                </div>
+            `;
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function clearChat() {
+            const chatArea = document.getElementById('chatArea');
+            chatArea.innerHTML = `
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span class="text-white text-sm">🐺</span>
+                    </div>
+                    <div class="chat-bubble-bot px-4 py-3 max-w-[85%]">
+                        <p class="text-sm">Chat limpo! Faça uma nova pergunta para testar a configuração atualizada.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Warn before leaving with unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (configState.hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Initialize
+        updateSummary();
+    </script>
+</body>
+</html>

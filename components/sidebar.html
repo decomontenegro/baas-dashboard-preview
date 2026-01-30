@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BaaS Dashboard - Sidebar Premium</title>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Colors */
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a24;
+            --bg-hover: #22222e;
+            --bg-active: rgba(99, 102, 241, 0.15);
+            
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            
+            --accent-primary: #6366f1;
+            --accent-secondary: #818cf8;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-active: rgba(99, 102, 241, 0.5);
+            
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            
+            /* Sidebar */
+            --sidebar-width: 280px;
+            --sidebar-collapsed: 80px;
+            --transition-speed: 0.3s;
+            --transition-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* ========================================
+           SIDEBAR CONTAINER
+        ======================================== */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            transition: width var(--transition-speed) ease,
+                        transform var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed);
+        }
+
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .section-title,
+        .sidebar.collapsed .shortcut-hint,
+        .sidebar.collapsed .tenant-info,
+        .sidebar.collapsed .user-info,
+        .sidebar.collapsed .badge-text,
+        .sidebar.collapsed .submenu {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
+        }
+
+        .sidebar.collapsed .logo-text {
+            opacity: 0;
+            width: 0;
+            margin-left: 0;
+        }
+
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding: 12px;
+        }
+
+        .sidebar.collapsed .nav-icon {
+            margin-right: 0;
+        }
+
+        .sidebar.collapsed .tenant-switcher {
+            padding: 8px;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .user-menu {
+            padding: 12px;
+            justify-content: center;
+        }
+
+        /* ========================================
+           HEADER / LOGO
+        ======================================== */
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            min-height: 72px;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .logo-icon svg {
+            width: 22px;
+            height: 22px;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+            transition: opacity var(--transition-speed) ease,
+                        width var(--transition-speed) ease,
+                        margin var(--transition-speed) ease;
+        }
+
+        .collapse-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .collapse-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .collapse-btn svg {
+            width: 16px;
+            height: 16px;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .collapse-btn svg {
+            transform: rotate(180deg);
+        }
+
+        /* ========================================
+           TENANT SWITCHER
+        ======================================== */
+        .tenant-switcher {
+            margin: 16px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .tenant-switcher:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-primary);
+        }
+
+        .tenant-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .tenant-info {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .tenant-name {
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tenant-plan {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tenant-plan .plan-badge {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .tenant-arrow {
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .tenant-arrow svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Tenant Dropdown */
+        .tenant-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .tenant-switcher.active .tenant-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .tenant-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .tenant-option:hover {
+            background: var(--bg-hover);
+        }
+
+        .tenant-option.active {
+            background: var(--bg-active);
+        }
+
+        .tenant-option .tenant-logo {
+            width: 32px;
+            height: 32px;
+        }
+
+        .tenant-option-info {
+            flex: 1;
+        }
+
+        .tenant-option-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .tenant-option-id {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .add-tenant {
+            border-top: 1px solid var(--border-color);
+            color: var(--accent-primary);
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .add-tenant svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ========================================
+           NAVIGATION
+        ======================================== */
+        .nav-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 8px 12px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--bg-hover) transparent;
+        }
+
+        .nav-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .nav-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .nav-container::-webkit-scrollbar-thumb {
+            background: var(--bg-hover);
+            border-radius: 2px;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .nav-list {
+            list-style: none;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 2px;
+            position: relative;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--bg-active);
+            color: var(--accent-secondary);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 24px;
+            background: var(--accent-gradient);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            flex-shrink: 0;
+            transition: margin var(--transition-speed) ease;
+        }
+
+        .nav-text {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        /* Badges */
+        .nav-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .nav-badge.count {
+            background: var(--danger);
+            color: white;
+            min-width: 20px;
+            justify-content: center;
+        }
+
+        .nav-badge.new {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .nav-badge.beta {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .sidebar.collapsed .nav-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            padding: 0;
+            width: 8px;
+            height: 8px;
+            min-width: 8px;
+            border-radius: 50%;
+        }
+
+        .sidebar.collapsed .nav-badge .badge-text {
+            display: none;
+        }
+
+        /* Shortcut Hints */
+        .shortcut-hint {
+            font-size: 10px;
+            color: var(--text-muted);
+            background: var(--bg-tertiary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'SF Mono', Monaco, monospace;
+            border: 1px solid var(--border-color);
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        /* Submenu */
+        .has-submenu .nav-arrow {
+            margin-left: auto;
+            transition: transform 0.2s ease;
+        }
+
+        .has-submenu .nav-arrow svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .has-submenu.expanded .nav-arrow {
+            transform: rotate(90deg);
+        }
+
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .has-submenu.expanded .submenu {
+            max-height: 500px;
+            opacity: 1;
+        }
+
+        .submenu .nav-item {
+            padding-left: 44px;
+            font-size: 13px;
+        }
+
+        .submenu .nav-item::before {
+            display: none;
+        }
+
+        .submenu .nav-item.active {
+            background: transparent;
+            color: var(--accent-secondary);
+        }
+
+        .submenu .nav-item:hover {
+            background: var(--bg-hover);
+        }
+
+        /* ========================================
+           USER MENU
+        ======================================== */
+        .sidebar-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 12px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .user-menu:hover {
+            background: var(--bg-hover);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .user-status {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            background: var(--success);
+            border: 2px solid var(--bg-secondary);
+            border-radius: 50%;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .user-menu-icon {
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .user-menu-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* User Dropdown */
+        .user-dropdown {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s ease;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .user-menu.active .user-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .user-dropdown-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-dropdown-header .user-avatar {
+            width: 48px;
+            height: 48px;
+        }
+
+        .user-dropdown-info .user-email {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .user-dropdown-menu {
+            padding: 8px;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .dropdown-item svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .dropdown-item.danger {
+            color: var(--danger);
+        }
+
+        .dropdown-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 8px 0;
+        }
+
+        /* ========================================
+           MAIN CONTENT
+        ======================================== */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 32px;
+            transition: margin-left var(--transition-speed) ease;
+            min-height: 100vh;
+            background: var(--bg-primary);
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            margin-left: var(--sidebar-collapsed);
+        }
+
+        .demo-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 800px;
+        }
+
+        .demo-card h1 {
+            font-size: 28px;
+            margin-bottom: 12px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .demo-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .shortcuts-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .shortcut-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .shortcut-row span {
+            color: var(--text-secondary);
+        }
+
+        .shortcut-row kbd {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: var(--bg-hover);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* ========================================
+           MOBILE STYLES
+        ======================================== */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 8px 16px;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom));
+            z-index: 1001;
+        }
+
+        .mobile-nav-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            position: relative;
+        }
+
+        .mobile-nav-item.active {
+            color: var(--accent-primary);
+        }
+
+        .mobile-nav-item svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .mobile-nav-item span {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .mobile-nav-item .mobile-badge {
+            position: absolute;
+            top: 4px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            width: 44px;
+            height: 44px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 998;
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: var(--sidebar-width);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar.collapsed {
+                width: var(--sidebar-width);
+            }
+
+            .mobile-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+
+            .mobile-bottom-nav {
+                display: block;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                padding: 80px 16px 100px;
+            }
+
+            .collapse-btn {
+                display: none;
+            }
+        }
+
+        /* ========================================
+           TOOLTIP (for collapsed state)
+        ======================================== */
+        .nav-tooltip {
+            position: absolute;
+            left: calc(100% + 12px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .nav-tooltip::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 6px solid transparent;
+            border-right-color: var(--border-color);
+        }
+
+        .nav-tooltip::after {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-right-color: var(--bg-tertiary);
+        }
+
+        .sidebar.collapsed .nav-item:hover .nav-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ========================================
+           ANIMATIONS
+        ======================================== */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .nav-badge.count {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .nav-item {
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        .nav-item:nth-child(1) { animation-delay: 0.05s; }
+        .nav-item:nth-child(2) { animation-delay: 0.1s; }
+        .nav-item:nth-child(3) { animation-delay: 0.15s; }
+        .nav-item:nth-child(4) { animation-delay: 0.2s; }
+        .nav-item:nth-child(5) { animation-delay: 0.25s; }
+    </style>
+</head>
+<body>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+    
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i data-lucide="menu"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Header -->
+        <div class="sidebar-header">
+            <div class="logo-wrapper">
+                <div class="logo-icon">
+                    <i data-lucide="bot"></i>
+                </div>
+                <span class="logo-text">BaaS</span>
+            </div>
+            <button class="collapse-btn" id="collapseBtn" title="Colapsar sidebar (⌘+B)">
+                <i data-lucide="panel-left-close"></i>
+            </button>
+        </div>
+
+        <!-- Tenant Switcher -->
+        <div class="tenant-switcher" id="tenantSwitcher">
+            <div class="tenant-logo">AC</div>
+            <div class="tenant-info">
+                <div class="tenant-name">Acme Corp</div>
+                <div class="tenant-plan">
+                    <span class="plan-badge">Pro</span>
+                </div>
+            </div>
+            <div class="tenant-arrow">
+                <i data-lucide="chevrons-up-down"></i>
+            </div>
+            
+            <!-- Tenant Dropdown -->
+            <div class="tenant-dropdown">
+                <div class="tenant-option active">
+                    <div class="tenant-logo">AC</div>
+                    <div class="tenant-option-info">
+                        <div class="tenant-option-name">Acme Corp</div>
+                        <div class="tenant-option-id">acme-corp</div>
+                    </div>
+                    <i data-lucide="check" style="width: 16px; height: 16px; color: var(--accent-primary);"></i>
+                </div>
+                <div class="tenant-option">
+                    <div class="tenant-logo" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">ST</div>
+                    <div class="tenant-option-info">
+                        <div class="tenant-option-name">Startup Inc</div>
+                        <div class="tenant-option-id">startup-inc</div>
+                    </div>
+                </div>
+                <div class="tenant-option">
+                    <div class="tenant-logo" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">DV</div>
+                    <div class="tenant-option-info">
+                        <div class="tenant-option-name">Dev Team</div>
+                        <div class="tenant-option-id">dev-team</div>
+                    </div>
+                </div>
+                <div class="tenant-option add-tenant">
+                    <i data-lucide="plus"></i>
+                    <span>Adicionar empresa</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav-container">
+            <!-- Principal -->
+            <div class="nav-section">
+                <div class="section-title">Principal</div>
+                <ul class="nav-list">
+                    <li>
+                        <a href="#" class="nav-item active">
+                            <i data-lucide="layout-dashboard" class="nav-icon"></i>
+                            <span class="nav-text">Dashboard</span>
+                            <span class="shortcut-hint">⌘D</span>
+                            <span class="nav-tooltip">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="message-square" class="nav-icon"></i>
+                            <span class="nav-text">Conversas</span>
+                            <span class="nav-badge count"><span class="badge-text">12</span></span>
+                            <span class="nav-tooltip">Conversas (12)</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="users" class="nav-icon"></i>
+                            <span class="nav-text">Contatos</span>
+                            <span class="nav-tooltip">Contatos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="calendar" class="nav-icon"></i>
+                            <span class="nav-text">Agendamentos</span>
+                            <span class="nav-badge new"><span class="badge-text">Novo</span></span>
+                            <span class="nav-tooltip">Agendamentos</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Automação -->
+            <div class="nav-section">
+                <div class="section-title">Automação</div>
+                <ul class="nav-list">
+                    <li class="has-submenu" id="flowsSubmenu">
+                        <a href="#" class="nav-item">
+                            <i data-lucide="git-branch" class="nav-icon"></i>
+                            <span class="nav-text">Fluxos</span>
+                            <span class="nav-arrow"><i data-lucide="chevron-right"></i></span>
+                            <span class="nav-tooltip">Fluxos</span>
+                        </a>
+                        <ul class="submenu nav-list">
+                            <li><a href="#" class="nav-item">Todos os fluxos</a></li>
+                            <li><a href="#" class="nav-item">Templates</a></li>
+                            <li><a href="#" class="nav-item">Rascunhos</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="brain" class="nav-icon"></i>
+                            <span class="nav-text">Agentes IA</span>
+                            <span class="nav-badge beta"><span class="badge-text">Beta</span></span>
+                            <span class="nav-tooltip">Agentes IA</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="zap" class="nav-icon"></i>
+                            <span class="nav-text">Triggers</span>
+                            <span class="nav-tooltip">Triggers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="webhook" class="nav-icon"></i>
+                            <span class="nav-text">Webhooks</span>
+                            <span class="nav-tooltip">Webhooks</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Canais -->
+            <div class="nav-section">
+                <div class="section-title">Canais</div>
+                <ul class="nav-list">
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="smartphone" class="nav-icon"></i>
+                            <span class="nav-text">WhatsApp</span>
+                            <span class="nav-tooltip">WhatsApp</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="instagram" class="nav-icon"></i>
+                            <span class="nav-text">Instagram</span>
+                            <span class="nav-tooltip">Instagram</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="globe" class="nav-icon"></i>
+                            <span class="nav-text">Web Chat</span>
+                            <span class="nav-tooltip">Web Chat</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="plug" class="nav-icon"></i>
+                            <span class="nav-text">Integrações</span>
+                            <span class="nav-tooltip">Integrações</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Analytics -->
+            <div class="nav-section">
+                <div class="section-title">Analytics</div>
+                <ul class="nav-list">
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="bar-chart-3" class="nav-icon"></i>
+                            <span class="nav-text">Relatórios</span>
+                            <span class="shortcut-hint">⌘R</span>
+                            <span class="nav-tooltip">Relatórios</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="activity" class="nav-icon"></i>
+                            <span class="nav-text">Tempo Real</span>
+                            <span class="nav-tooltip">Tempo Real</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="file-text" class="nav-icon"></i>
+                            <span class="nav-text">Logs</span>
+                            <span class="nav-tooltip">Logs</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Configurações -->
+            <div class="nav-section">
+                <div class="section-title">Configurações</div>
+                <ul class="nav-list">
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="settings" class="nav-icon"></i>
+                            <span class="nav-text">Configurações</span>
+                            <span class="shortcut-hint">⌘,</span>
+                            <span class="nav-tooltip">Configurações</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="shield" class="nav-icon"></i>
+                            <span class="nav-text">Segurança</span>
+                            <span class="nav-tooltip">Segurança</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="credit-card" class="nav-icon"></i>
+                            <span class="nav-text">Faturamento</span>
+                            <span class="nav-tooltip">Faturamento</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i data-lucide="help-circle" class="nav-icon"></i>
+                            <span class="nav-text">Ajuda</span>
+                            <span class="shortcut-hint">?</span>
+                            <span class="nav-tooltip">Ajuda</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- User Menu -->
+        <div class="sidebar-footer">
+            <div class="user-menu" id="userMenu">
+                <div class="user-avatar">
+                    JD
+                    <div class="user-status"></div>
+                </div>
+                <div class="user-info">
+                    <div class="user-name">João Dev</div>
+                    <div class="user-role">Administrador</div>
+                </div>
+                <div class="user-menu-icon">
+                    <i data-lucide="more-vertical"></i>
+                </div>
+
+                <!-- User Dropdown -->
+                <div class="user-dropdown">
+                    <div class="user-dropdown-header">
+                        <div class="user-avatar">JD</div>
+                        <div class="user-dropdown-info">
+                            <div class="user-name">João Dev</div>
+                            <div class="user-email">joao@acmecorp.com</div>
+                        </div>
+                    </div>
+                    <div class="user-dropdown-menu">
+                        <div class="dropdown-item">
+                            <i data-lucide="user"></i>
+                            <span>Meu Perfil</span>
+                        </div>
+                        <div class="dropdown-item">
+                            <i data-lucide="bell"></i>
+                            <span>Notificações</span>
+                        </div>
+                        <div class="dropdown-item">
+                            <i data-lucide="palette"></i>
+                            <span>Aparência</span>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item">
+                            <i data-lucide="keyboard"></i>
+                            <span>Atalhos de Teclado</span>
+                        </div>
+                        <div class="dropdown-item">
+                            <i data-lucide="book-open"></i>
+                            <span>Documentação</span>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item danger">
+                            <i data-lucide="log-out"></i>
+                            <span>Sair</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-nav-items">
+            <a href="#" class="mobile-nav-item active">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Home</span>
+            </a>
+            <a href="#" class="mobile-nav-item">
+                <i data-lucide="message-square"></i>
+                <span>Chats</span>
+                <div class="mobile-badge"></div>
+            </a>
+            <a href="#" class="mobile-nav-item">
+                <i data-lucide="git-branch"></i>
+                <span>Fluxos</span>
+            </a>
+            <a href="#" class="mobile-nav-item">
+                <i data-lucide="bar-chart-3"></i>
+                <span>Analytics</span>
+            </a>
+            <a href="#" class="mobile-nav-item" id="mobileMoreBtn">
+                <i data-lucide="menu"></i>
+                <span>Menu</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="demo-card">
+            <h1>🎨 Sidebar Premium</h1>
+            <p>
+                Uma sidebar moderna e responsiva com todas as funcionalidades premium 
+                para seu dashboard BaaS. Teste os recursos abaixo:
+            </p>
+            
+            <div class="shortcuts-list">
+                <div class="shortcut-row">
+                    <span>Colapsar/Expandir sidebar</span>
+                    <kbd>⌘ + B</kbd>
+                </div>
+                <div class="shortcut-row">
+                    <span>Ir para Dashboard</span>
+                    <kbd>⌘ + D</kbd>
+                </div>
+                <div class="shortcut-row">
+                    <span>Abrir Relatórios</span>
+                    <kbd>⌘ + R</kbd>
+                </div>
+                <div class="shortcut-row">
+                    <span>Configurações</span>
+                    <kbd>⌘ + ,</kbd>
+                </div>
+                <div class="shortcut-row">
+                    <span>Ajuda</span>
+                    <kbd>?</kbd>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const collapseBtn = document.getElementById('collapseBtn');
+        const tenantSwitcher = document.getElementById('tenantSwitcher');
+        const userMenu = document.getElementById('userMenu');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+        const mobileMoreBtn = document.getElementById('mobileMoreBtn');
+
+        // Collapse/Expand Sidebar
+        collapseBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        });
+
+        // Load saved state
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            sidebar.classList.add('collapsed');
+        }
+
+        // Tenant Switcher Toggle
+        tenantSwitcher.addEventListener('click', (e) => {
+            e.stopPropagation();
+            tenantSwitcher.classList.toggle('active');
+            userMenu.classList.remove('active');
+        });
+
+        // Tenant Option Selection
+        document.querySelectorAll('.tenant-option:not(.add-tenant)').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.tenant-option').forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+                tenantSwitcher.classList.remove('active');
+            });
+        });
+
+        // User Menu Toggle
+        userMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userMenu.classList.toggle('active');
+            tenantSwitcher.classList.remove('active');
+        });
+
+        // Close dropdowns on outside click
+        document.addEventListener('click', () => {
+            tenantSwitcher.classList.remove('active');
+            userMenu.classList.remove('active');
+        });
+
+        // Submenu Toggle
+        document.querySelectorAll('.has-submenu > .nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const parent = item.parentElement;
+                parent.classList.toggle('expanded');
+            });
+        });
+
+        // Nav Item Active State
+        document.querySelectorAll('.nav-item:not(.has-submenu .nav-item)').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.closest('.has-submenu')) return;
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Mobile Menu
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.add('mobile-open');
+            mobileOverlay.classList.add('active');
+        });
+
+        mobileMoreBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            sidebar.classList.add('mobile-open');
+            mobileOverlay.classList.add('active');
+        });
+
+        mobileOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-open');
+            mobileOverlay.classList.remove('active');
+        });
+
+        // Mobile Bottom Nav Active State
+        document.querySelectorAll('.mobile-nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                if (this.id === 'mobileMoreBtn') return;
+                document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Check for Cmd/Ctrl key
+            if (e.metaKey || e.ctrlKey) {
+                switch(e.key.toLowerCase()) {
+                    case 'b':
+                        e.preventDefault();
+                        collapseBtn.click();
+                        break;
+                    case 'd':
+                        e.preventDefault();
+                        document.querySelector('[data-lucide="layout-dashboard"]').closest('.nav-item').click();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        document.querySelector('[data-lucide="bar-chart-3"]').closest('.nav-item').click();
+                        break;
+                    case ',':
+                        e.preventDefault();
+                        document.querySelector('[data-lucide="settings"]').closest('.nav-item').click();
+                        break;
+                }
+            }
+            
+            // Help shortcut
+            if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
+                document.querySelector('[data-lucide="help-circle"]').closest('.nav-item').click();
+            }
+        });
+
+        // Console welcome
+        console.log('%c🚀 BaaS Dashboard Sidebar', 'font-size: 20px; font-weight: bold; color: #6366f1;');
+        console.log('%cPressione ⌘+B para colapsar a sidebar', 'color: #a1a1aa;');
+    </script>
+</body>
+</html>

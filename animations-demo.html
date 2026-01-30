@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BaaS Dashboard - Animations Demo</title>
+  <link rel="stylesheet" href="styles/animations.css">
+  <style>
+    /* Demo Page Styles */
+    :root {
+      --bg-primary: #0f0f1a;
+      --bg-secondary: #1a1a2e;
+      --bg-card: #16162a;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0b2;
+      --accent: #6366f1;
+      --accent-light: #8b5cf6;
+      --success: #22c55e;
+      --error: #ef4444;
+      --warning: #f59e0b;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 60px;
+    }
+    
+    .section {
+      margin-bottom: 80px;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .section-number {
+      background: var(--accent);
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    
+    .demo-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .demo-card h3 {
+      font-size: 1rem;
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+    
+    .demo-area {
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    /* Button Styles */
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    
+    .btn-error {
+      background: var(--error);
+      color: white;
+    }
+    
+    /* Card Preview */
+    .preview-card {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      text-align: left;
+    }
+    
+    /* Skeleton Demo */
+    .skeleton-demo {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+    }
+    
+    .skeleton-content {
+      flex: 1;
+    }
+    
+    /* Loading Demo */
+    .loading-demo {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Toast Demo */
+    .toast {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-left: 4px solid var(--accent);
+      min-width: 280px;
+    }
+    
+    .toast-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .toast-success { border-left-color: var(--success); }
+    .toast-error { border-left-color: var(--error); }
+    
+    .toast-content {
+      flex: 1;
+    }
+    
+    .toast-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    
+    .toast-message {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    /* Modal Demo */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal-backdrop.active {
+      display: flex;
+    }
+    
+    .modal {
+      background: var(--bg-secondary);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 450px;
+      width: 90%;
+      text-align: center;
+    }
+    
+    .modal h2 {
+      margin-bottom: 16px;
+    }
+    
+    .modal p {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    
+    /* Sidebar Demo */
+    .sidebar-demo {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+    }
+    
+    .mini-sidebar {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 16px;
+      width: 200px;
+    }
+    
+    .mini-sidebar.collapsed {
+      width: 60px;
+    }
+    
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: rgba(255,255,255,0.05);
+      overflow: hidden;
+    }
+    
+    .sidebar-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    
+    .sidebar-text {
+      white-space: nowrap;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    
+    .mini-sidebar.collapsed .sidebar-text {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    
+    /* Chart Demo */
+    .chart-demo {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 120px;
+      padding: 20px 0;
+    }
+    
+    .bar {
+      flex: 1;
+      background: linear-gradient(to top, var(--accent), var(--accent-light));
+      border-radius: 4px 4px 0 0;
+      min-height: 20px;
+    }
+    
+    /* Number Counter Demo */
+    .counter-display {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    /* SVG Icons */
+    .icon-check {
+      color: var(--success);
+    }
+    
+    .icon-x {
+      color: var(--error);
+    }
+    
+    /* Confetti Container */
+    .confetti-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      display: none;
+    }
+    
+    .confetti-container.active {
+      display: block;
+    }
+    
+    /* List Items */
+    .list-item {
+      background: var(--bg-secondary);
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .list-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    }
+    
+    .list-content {
+      flex: 1;
+    }
+    
+    .list-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    
+    .list-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    /* Hover Preview Cards */
+    .hover-demo-card {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      width: 100%;
+    }
+    
+    /* Progress */
+    .progress-demo {
+      width: 100%;
+      max-width: 300px;
+    }
+    
+    /* Replay Button */
+    .replay-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      margin-top: 16px;
+      transition: background 0.2s;
+    }
+    
+    .replay-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    /* Success/Error Icons */
+    .feedback-icon {
+      width: 80px;
+      height: 80px;
+    }
+    
+    /* Page Transition Demo */
+    .page-demo {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✨ BaaS Animations</h1>
+    <p class="subtitle">Premium CSS animations & micro-interactions for the dashboard</p>
+    
+    <!-- 1. Page Transitions -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">1</span>
+        Page Transitions
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Fade + Scale</h3>
+          <div class="demo-area">
+            <div class="page-demo page-enter" id="page-demo-1">
+              <h4>Dashboard Content</h4>
+              <p style="color: var(--text-secondary); font-size: 0.9rem;">Page enters with fade & scale</p>
+            </div>
+          </div>
+          <button class="replay-btn" onclick="replayAnimation('page-demo-1', 'page-enter')">↻ Replay</button>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Slide Up</h3>
+          <div class="demo-area">
+            <div class="page-demo animate-slide-up" id="page-demo-2">
+              <h4>New Section</h4>
+              <p style="color: var(--text-secondary); font-size: 0.9rem;">Slides in from bottom</p>
+            </div>
+          </div>
+          <button class="replay-btn" onclick="replayAnimation('page-demo-2', 'animate-slide-up')">↻ Replay</button>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Slide Directions</h3>
+          <div class="demo-area" style="flex-direction: column; gap: 8px;">
+            <div class="page-demo animate-slide-left" id="page-demo-3" style="padding: 15px;">← Left</div>
+            <div class="page-demo animate-slide-right" id="page-demo-4" style="padding: 15px;">Right →</div>
+          </div>
+          <button class="replay-btn" onclick="replayAnimation('page-demo-3', 'animate-slide-left'); replayAnimation('page-demo-4', 'animate-slide-right');">↻ Replay</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 2. Staggered Lists -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">2</span>
+        Staggered List Animations
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card" style="grid-column: span 2;">
+          <h3>Stagger Fade In</h3>
+          <div class="demo-area" style="flex-direction: column; align-items: stretch;">
+            <div class="stagger-list" id="stagger-demo">
+              <div class="list-item">
+                <div class="list-avatar"></div>
+                <div class="list-content">
+                  <div class="list-title">Bot Analytics</div>
+                  <div class="list-subtitle">12,450 messages today</div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-avatar"></div>
+                <div class="list-content">
+                  <div class="list-title">User Engagement</div>
+                  <div class="list-subtitle">89% response rate</div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-avatar"></div>
+                <div class="list-content">
+                  <div class="list-title">Revenue</div>
+                  <div class="list-subtitle">$4,320 this week</div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-avatar"></div>
+                <div class="list-content">
+                  <div class="list-title">New Subscribers</div>
+                  <div class="list-subtitle">+156 this month</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="replay-btn" onclick="replayStagger('stagger-demo')">↻ Replay Stagger</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 3. Hover Effects -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">3</span>
+        Hover Effects (Mouse over cards)
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Lift Effect</h3>
+          <div class="demo-area">
+            <div class="hover-demo-card hover-lift">
+              <p>Hover me!</p>
+              <small style="color: var(--text-secondary);">I lift up</small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Scale Effect</h3>
+          <div class="demo-area">
+            <div class="hover-demo-card hover-scale">
+              <p>Hover me!</p>
+              <small style="color: var(--text-secondary);">I scale up</small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Glow Effect</h3>
+          <div class="demo-area">
+            <div class="hover-demo-card hover-glow">
+              <p>Hover me!</p>
+              <small style="color: var(--text-secondary);">I glow</small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Shine Effect</h3>
+          <div class="demo-area">
+            <div class="hover-demo-card hover-shine">
+              <p>Hover me!</p>
+              <small style="color: var(--text-secondary);">Watch the shine</small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Magnetic Effect</h3>
+          <div class="demo-area">
+            <div class="hover-demo-card hover-magnetic">
+              <p>Hover me!</p>
+              <small style="color: var(--text-secondary);">Subtle pull</small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Border Glow</h3>
+          <div class="demo-area">
+            <div class="hover-demo-card hover-border-glow" style="border: 2px solid var(--accent);">
+              <p>Hover me!</p>
+              <small style="color: var(--text-secondary);">Pulsing border</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 4. Loading States -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">4</span>
+        Loading States
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Skeleton Pulse</h3>
+          <div class="demo-area">
+            <div class="skeleton-demo">
+              <div class="skeleton skeleton-avatar"></div>
+              <div class="skeleton-content">
+                <div class="skeleton skeleton-title"></div>
+                <div class="skeleton skeleton-text" style="width: 80%;"></div>
+                <div class="skeleton skeleton-text" style="width: 60%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Shimmer Effect</h3>
+          <div class="demo-area">
+            <div class="shimmer" style="width: 100%; height: 80px; border-radius: 12px;"></div>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Spinners</h3>
+          <div class="demo-area loading-demo">
+            <div class="spinner"></div>
+            <div class="spinner spinner-lg"></div>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Loading Dots</h3>
+          <div class="demo-area">
+            <div class="loading-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="demo-card" style="grid-column: span 2;">
+          <h3>Progress Bar (Indeterminate)</h3>
+          <div class="demo-area">
+            <div class="progress-demo">
+              <div class="progress-bar progress-bar-indeterminate"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 5. Success/Error Feedback -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">5</span>
+        Success/Error Feedback
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Success Checkmark</h3>
+          <div class="demo-area">
+            <svg class="feedback-icon success-checkmark" id="success-check" viewBox="0 0 52 52">
+              <circle cx="26" cy="26" r="24" fill="none" stroke="#22c55e" stroke-width="3"/>
+              <path fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M14 27l7 7 16-16"/>
+            </svg>
+          </div>
+          <button class="replay-btn" onclick="replaySuccess()">↻ Replay</button>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Error Shake</h3>
+          <div class="demo-area">
+            <div class="preview-card animate-shake" id="error-shake" style="border: 2px solid var(--error);">
+              <p style="color: var(--error);">❌ Invalid Input</p>
+            </div>
+          </div>
+          <button class="replay-btn" onclick="replayAnimation('error-shake', 'animate-shake')">↻ Replay</button>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Success Pulse</h3>
+          <div class="demo-area">
+            <div class="preview-card success-pulse" id="success-pulse" style="border: 2px solid var(--success);">
+              <p style="color: var(--success);">✓ Saved Successfully</p>
+            </div>
+          </div>
+          <button class="replay-btn" onclick="replayAnimation('success-pulse', 'success-pulse')">↻ Replay</button>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Error Pulse</h3>
+          <div class="demo-area">
+            <div class="preview-card error-pulse" id="error-pulse" style="border: 2px solid var(--error);">
+              <p style="color: var(--error);">✗ Operation Failed</p>
+            </div>
+          </div>
+          <button class="replay-btn" onclick="replayAnimation('error-pulse', 'error-pulse')">↻ Replay</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 6. Button Click Feedback -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">6</span>
+        Button Click Feedback
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Ripple Effect</h3>
+          <div class="demo-area">
+            <button class="btn btn-primary btn-ripple">Click Me</button>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Press Down</h3>
+          <div class="demo-area">
+            <button class="btn btn-primary btn-press">Press Me</button>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Bounce Click</h3>
+          <div class="demo-area">
+            <button class="btn btn-primary btn-bounce">Bounce Me</button>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Loading State</h3>
+          <div class="demo-area">
+            <button class="btn btn-primary" id="loading-btn" onclick="toggleLoading()">
+              <span>Submit</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 7. Modal Enter/Exit -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">7</span>
+        Modal Animations
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Scale + Fade</h3>
+          <div class="demo-area">
+            <button class="btn btn-primary" onclick="openModal('modal-scale')">Open Modal</button>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Slide from Bottom</h3>
+          <div class="demo-area">
+            <button class="btn btn-secondary" onclick="openModal('modal-slide')">Open Modal</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 8. Sidebar Collapse -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">8</span>
+        Sidebar Collapse
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card" style="grid-column: span 2;">
+          <h3>Toggle Sidebar</h3>
+          <div class="demo-area">
+            <div class="sidebar-demo">
+              <div class="mini-sidebar sidebar" id="sidebar-demo">
+                <div class="sidebar-item">
+                  <div class="sidebar-icon"></div>
+                  <span class="sidebar-text">Dashboard</span>
+                </div>
+                <div class="sidebar-item">
+                  <div class="sidebar-icon"></div>
+                  <span class="sidebar-text">Analytics</span>
+                </div>
+                <div class="sidebar-item">
+                  <div class="sidebar-icon"></div>
+                  <span class="sidebar-text">Settings</span>
+                </div>
+              </div>
+              <button class="btn btn-secondary" onclick="toggleSidebar()">Toggle Collapse</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 9. Number Counting -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">9</span>
+        Number Counting
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Count Up Animation</h3>
+          <div class="demo-area">
+            <div class="counter-display" id="counter">0</div>
+          </div>
+          <button class="replay-btn" onclick="animateCounter()">↻ Replay</button>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Number Pop</h3>
+          <div class="demo-area">
+            <div class="counter-display number-pop" id="number-pop">$4,320</div>
+          </div>
+          <button class="replay-btn" onclick="replayAnimation('number-pop', 'number-pop')">↻ Replay</button>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Increment Flash</h3>
+          <div class="demo-area">
+            <div class="counter-display number-increment" id="number-inc">+156</div>
+          </div>
+          <button class="replay-btn" onclick="replayAnimation('number-inc', 'number-increment')">↻ Replay</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 10. Chart Reveal -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">10</span>
+        Chart Reveal Animations
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card" style="grid-column: span 2;">
+          <h3>Bar Chart Rise</h3>
+          <div class="demo-area">
+            <div class="chart-demo" id="chart-demo">
+              <div class="bar chart-bar" style="height: 60%;"></div>
+              <div class="bar chart-bar" style="height: 80%;"></div>
+              <div class="bar chart-bar" style="height: 45%;"></div>
+              <div class="bar chart-bar" style="height: 90%;"></div>
+              <div class="bar chart-bar" style="height: 70%;"></div>
+              <div class="bar chart-bar" style="height: 55%;"></div>
+              <div class="bar chart-bar" style="height: 100%;"></div>
+            </div>
+          </div>
+          <button class="replay-btn" onclick="replayChart()">↻ Replay</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 11. Toast Notifications -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">11</span>
+        Toast Notifications
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Slide from Right</h3>
+          <div class="demo-area">
+            <button class="btn btn-primary" onclick="showToast('right')">Show Toast</button>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Drop from Top</h3>
+          <div class="demo-area">
+            <button class="btn btn-secondary" onclick="showToast('top')">Show Toast</button>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Success Toast</h3>
+          <div class="demo-area">
+            <div class="toast toast-success toast-enter" id="toast-success">
+              <div class="toast-icon" style="background: var(--success);">✓</div>
+              <div class="toast-content">
+                <div class="toast-title">Success!</div>
+                <div class="toast-message">Bot deployed successfully</div>
+              </div>
+            </div>
+          </div>
+          <button class="replay-btn" onclick="replayAnimation('toast-success', 'toast-enter')">↻ Replay</button>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Error Toast</h3>
+          <div class="demo-area">
+            <div class="toast toast-error toast-enter" id="toast-error">
+              <div class="toast-icon" style="background: var(--error);">✗</div>
+              <div class="toast-content">
+                <div class="toast-title">Error</div>
+                <div class="toast-message">Failed to save changes</div>
+              </div>
+            </div>
+          </div>
+          <button class="replay-btn" onclick="replayAnimation('toast-error', 'toast-enter')">↻ Replay</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 12. Confetti -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">12</span>
+        Confetti (Onboarding Success)
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card" style="grid-column: span 2;">
+          <h3>Celebration Confetti</h3>
+          <div class="demo-area" style="flex-direction: column;">
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">🎉 Click to celebrate onboarding completion!</p>
+            <button class="btn btn-success btn-press" onclick="triggerConfetti()">
+              Complete Onboarding 🚀
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 13. Utility Animations -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-number">13</span>
+        Utility Animations
+      </h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Pulse</h3>
+          <div class="demo-area">
+            <div class="animate-pulse" style="width: 60px; height: 60px; background: var(--accent); border-radius: 12px;"></div>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Bounce</h3>
+          <div class="demo-area">
+            <div class="animate-bounce" style="width: 60px; height: 60px; background: var(--accent); border-radius: 50%;"></div>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Float</h3>
+          <div class="demo-area">
+            <div class="animate-float" style="width: 60px; height: 60px; background: var(--accent); border-radius: 12px;"></div>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3>Attention Ping</h3>
+          <div class="demo-area">
+            <div style="position: relative;">
+              <div class="animate-ping" style="position: absolute; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; opacity: 0.5;"></div>
+              <div style="width: 60px; height: 60px; background: var(--accent); border-radius: 50%; position: relative;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+  <!-- Modals -->
+  <div class="modal-backdrop" id="modal-scale" onclick="closeModal('modal-scale')">
+    <div class="modal modal-enter" onclick="event.stopPropagation()">
+      <h2>🎉 Welcome!</h2>
+      <p>This modal scales and fades in beautifully.</p>
+      <button class="btn btn-primary" onclick="closeModal('modal-scale')">Close Modal</button>
+    </div>
+  </div>
+  
+  <div class="modal-backdrop" id="modal-slide" onclick="closeModal('modal-slide')">
+    <div class="modal modal-slide-enter" onclick="event.stopPropagation()">
+      <h2>📱 Mobile Style</h2>
+      <p>This modal slides up from the bottom, perfect for mobile.</p>
+      <button class="btn btn-primary" onclick="closeModal('modal-slide')">Close Modal</button>
+    </div>
+  </div>
+  
+  <!-- Confetti Container -->
+  <div class="confetti-container" id="confetti-container">
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+    <div class="confetti-piece"></div>
+  </div>
+  
+  <script>
+    // Replay animation utility
+    function replayAnimation(elementId, className) {
+      const el = document.getElementById(elementId);
+      el.classList.remove(className);
+      void el.offsetWidth; // Trigger reflow
+      el.classList.add(className);
+    }
+    
+    // Replay stagger list
+    function replayStagger(containerId) {
+      const container = document.getElementById(containerId);
+      const items = container.querySelectorAll('.list-item');
+      container.classList.remove('stagger-list');
+      items.forEach(item => item.style.opacity = '0');
+      void container.offsetWidth;
+      container.classList.add('stagger-list');
+    }
+    
+    // Replay success checkmark
+    function replaySuccess() {
+      const svg = document.getElementById('success-check');
+      svg.classList.remove('success-checkmark');
+      void svg.offsetWidth;
+      svg.classList.add('success-checkmark');
+    }
+    
+    // Toggle loading button
+    function toggleLoading() {
+      const btn = document.getElementById('loading-btn');
+      btn.classList.toggle('btn-loading');
+      setTimeout(() => {
+        btn.classList.remove('btn-loading');
+      }, 2000);
+    }
+    
+    // Modal controls
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+    
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = modal.querySelector('.modal');
+      content.classList.remove('modal-enter', 'modal-slide-enter');
+      content.classList.add('modal-exit', 'modal-slide-exit');
+      setTimeout(() => {
+        modal.classList.remove('active');
+        content.classList.remove('modal-exit', 'modal-slide-exit');
+        content.classList.add(modalId === 'modal-scale' ? 'modal-enter' : 'modal-slide-enter');
+      }, 200);
+    }
+    
+    // Sidebar toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar-demo');
+      sidebar.classList.toggle('collapsed');
+    }
+    
+    // Counter animation
+    function animateCounter() {
+      const counter = document.getElementById('counter');
+      const target = 12450;
+      const duration = 2000;
+      const start = performance.now();
+      
+      function update(currentTime) {
+        const elapsed = currentTime - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(easeOut * target);
+        counter.textContent = current.toLocaleString();
+        
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      }
+      
+      requestAnimationFrame(update);
+    }
+    
+    // Replay chart
+    function replayChart() {
+      const bars = document.querySelectorAll('#chart-demo .chart-bar');
+      bars.forEach(bar => {
+        bar.classList.remove('chart-bar');
+        void bar.offsetWidth;
+        bar.classList.add('chart-bar');
+      });
+    }
+    
+    // Show toast
+    function showToast(type) {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-success ${type === 'right' ? 'toast-enter' : 'toast-drop-enter'}`;
+      toast.innerHTML = `
+        <div class="toast-icon" style="background: var(--success);">✓</div>
+        <div class="toast-content">
+          <div class="toast-title">Notification</div>
+          <div class="toast-message">This toast will auto-dismiss</div>
+        </div>
+      `;
+      toast.style.position = 'fixed';
+      toast.style[type === 'right' ? 'right' : 'top'] = '20px';
+      toast.style[type === 'right' ? 'top' : 'left'] = type === 'right' ? '20px' : '50%';
+      if (type === 'top') toast.style.transform = 'translateX(-50%)';
+      toast.style.zIndex = '9999';
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.remove('toast-enter', 'toast-drop-enter');
+        toast.classList.add(type === 'right' ? 'toast-exit' : 'toast-drop-exit');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    
+    // Confetti
+    function triggerConfetti() {
+      const container = document.getElementById('confetti-container');
+      container.classList.add('active');
+      
+      setTimeout(() => {
+        container.classList.remove('active');
+      }, 3500);
+    }
+    
+    // Initial animations
+    animateCounter();
+  </script>
+</body>
+</html>

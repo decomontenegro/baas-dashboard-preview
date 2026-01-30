@@ -3,420 +3,1689 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bot-as-a-Service Dashboard - Preview</title>
+    <title>BaaS Dashboard - Bot-as-a-Service</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .sidebar-item:hover { background: rgba(99, 102, 241, 0.1); }
-        .sidebar-item.active { background: rgba(99, 102, 241, 0.15); border-right: 3px solid #6366f1; }
-        .card { transition: all 0.2s; }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-        .slider-track { background: linear-gradient(to right, #6366f1 var(--value), #e5e7eb var(--value)); }
+        * { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.5); }
+        
+        /* Dark mode scrollbar */
+        .dark ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }
+        .dark ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+        
+        /* Page transitions */
+        .page { 
+            display: none; 
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .page.active { 
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Sidebar transitions */
+        .sidebar {
+            transition: width 0.3s ease, transform 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .section-title,
+        .sidebar.collapsed .user-info,
+        .sidebar.collapsed .tenant-info,
+        .sidebar.collapsed .logo-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        
+        /* Nav item styles */
+        .nav-item {
+            transition: all 0.2s ease;
+        }
+        .nav-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.15) 0%, transparent 100%);
+            border-right: 3px solid #6366f1;
+        }
+        .dark .nav-item:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+        .dark .nav-item.active {
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.25) 0%, transparent 100%);
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.15);
+        }
+        
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            background: #e5e7eb;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .toggle-switch.active {
+            background: #6366f1;
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .toggle-switch.active::after {
+            left: 24px;
+        }
+        
+        /* Status pulse */
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Typing animation */
+        .typing-dot {
+            animation: typing 1.4s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+        
+        /* Chat bubbles */
+        .chat-bubble-user {
+            background: #f1f5f9;
+            border-radius: 18px 18px 4px 18px;
+        }
+        .chat-bubble-bot {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: 18px 18px 18px 4px;
+        }
+        .dark .chat-bubble-user {
+            background: #374151;
+        }
+        
+        /* Modal/Drawer */
+        .modal-overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            transform: scale(0.95) translateY(10px);
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+        
+        /* Toast notifications */
+        .toast {
+            animation: slideIn 0.3s ease forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Skeleton loading */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        .dark .skeleton {
+            background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+            background-size: 200% 100%;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Code editor */
+        .code-editor {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Integration cards */
+        .integration-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .integration-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15);
+        }
+
+        /* Feature card */
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            border-color: #a5b4fc;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.1);
+        }
+        .feature-card.enabled {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.02) 0%, rgba(99, 102, 241, 0.05) 100%);
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Floating action button */
+        .fab {
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s ease;
+        }
+        .fab:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 30px rgba(99, 102, 241, 0.5);
+        }
     </style>
 </head>
-<body class="bg-gray-50">
-    <div class="flex h-screen">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
+    <div class="flex h-screen overflow-hidden">
+        
         <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
-            <div class="p-6 border-b border-gray-200">
+        <aside id="sidebar" class="sidebar w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col fixed h-full z-50">
+            <!-- Logo -->
+            <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                         <span class="text-white text-xl">🤖</span>
                     </div>
-                    <div>
-                        <h1 class="font-bold text-gray-900">BaaS</h1>
-                        <p class="text-xs text-gray-500">Brand Voice AI</p>
+                    <span class="logo-text font-bold text-xl gradient-text transition-all duration-300">BaaS</span>
+                </div>
+                <button id="collapse-btn" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Colapsar (⌘B)">
+                    <i data-lucide="panel-left-close" class="w-5 h-5 text-gray-500"></i>
+                </button>
+            </div>
+            
+            <!-- Tenant Switcher -->
+            <div class="p-4">
+                <div class="tenant-switcher flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                    <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center text-white font-bold text-sm">L</div>
+                    <div class="tenant-info flex-1 min-w-0 transition-all duration-300">
+                        <p class="font-semibold text-sm truncate">Liqi</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Business Plan</p>
                     </div>
+                    <i data-lucide="chevrons-up-down" class="w-4 h-4 text-gray-400"></i>
                 </div>
             </div>
-            <nav class="flex-1 p-4">
+            
+            <!-- Navigation -->
+            <nav class="flex-1 overflow-y-auto p-4">
+                <div class="section-title text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-3 transition-all duration-300">Menu</div>
                 <ul class="space-y-1">
-                    <li class="sidebar-item active rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-indigo-600">
-                        <span>🏠</span> Overview
+                    <li>
+                        <a href="#overview" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-300" data-page="overview">
+                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                            <span class="nav-text transition-all duration-300">Overview</span>
+                        </a>
                     </li>
-                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600" onclick="showSection('channels')">
-                        <span>📱</span> Grupos & Canais
+                    <li>
+                        <a href="#channels" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-300" data-page="channels">
+                            <i data-lucide="message-square" class="w-5 h-5"></i>
+                            <span class="nav-text transition-all duration-300">Grupos & Canais</span>
+                            <span class="nav-text ml-auto bg-primary-500 text-white text-xs px-2 py-0.5 rounded-full">5</span>
+                        </a>
                     </li>
-                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600" onclick="showSection('behavior')">
-                        <span>🎭</span> Comportamento
+                    <li>
+                        <a href="#behavior" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-300" data-page="behavior">
+                            <i data-lucide="brain" class="w-5 h-5"></i>
+                            <span class="nav-text transition-all duration-300">Comportamento</span>
+                        </a>
                     </li>
-                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600" onclick="showSection('features')">
-                        <span>⚡</span> Funcionalidades
+                    <li>
+                        <a href="#features" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-300" data-page="features">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                            <span class="nav-text transition-all duration-300">Funcionalidades</span>
+                        </a>
                     </li>
-                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600" onclick="showSection('integrations')">
-                        <span>🔌</span> Integrações
+                    <li>
+                        <a href="#integrations" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-300" data-page="integrations">
+                            <i data-lucide="plug" class="w-5 h-5"></i>
+                            <span class="nav-text transition-all duration-300">Integrações</span>
+                            <span class="nav-text ml-auto flex items-center gap-1">
+                                <span class="w-2 h-2 bg-green-500 rounded-full pulse"></span>
+                                <span class="text-xs text-gray-500">2</span>
+                            </span>
+                        </a>
                     </li>
-                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600" onclick="showSection('billing')">
-                        <span>💰</span> Billing
+                </ul>
+                
+                <div class="section-title text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2 px-3 transition-all duration-300">Configurações</div>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="#billing" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-300" data-page="billing">
+                            <i data-lucide="credit-card" class="w-5 h-5"></i>
+                            <span class="nav-text transition-all duration-300">Billing</span>
+                        </a>
                     </li>
-                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
-                        <span>⚙️</span> Admin
+                    <li>
+                        <a href="#admin" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-300" data-page="admin">
+                            <i data-lucide="settings" class="w-5 h-5"></i>
+                            <span class="nav-text transition-all duration-300">Admin</span>
+                        </a>
                     </li>
                 </ul>
             </nav>
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-900">Liqi</p>
-                        <p class="text-xs text-gray-500">Business Plan</p>
+            
+            <!-- Footer -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                <!-- Dark Mode Toggle -->
+                <div class="flex items-center justify-between px-3 py-2 mb-3">
+                    <div class="flex items-center gap-2 nav-text transition-all duration-300">
+                        <i data-lucide="moon" class="w-4 h-4 text-gray-500"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Modo escuro</span>
                     </div>
+                    <div id="dark-mode-toggle" class="toggle-switch" onclick="toggleDarkMode()"></div>
+                </div>
+                
+                <!-- User -->
+                <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                    <div class="w-9 h-9 bg-gradient-to-br from-primary-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">JD</div>
+                    <div class="user-info flex-1 min-w-0 transition-all duration-300">
+                        <p class="font-medium text-sm truncate">João Demo</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Admin</p>
+                    </div>
+                    <i data-lucide="log-out" class="w-4 h-4 text-gray-400"></i>
                 </div>
             </div>
         </aside>
-
+        
         <!-- Main Content -->
-        <main class="flex-1 overflow-auto">
-            <!-- Header -->
-            <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
-                <div>
-                    <h2 class="text-xl font-semibold text-gray-900">Overview</h2>
-                    <p class="text-sm text-gray-500">Visão geral do seu bot</p>
+        <main id="main-content" class="flex-1 ml-64 overflow-y-auto transition-all duration-300">
+            
+            <!-- ==================== OVERVIEW PAGE ==================== -->
+            <div id="page-overview" class="page p-8">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-1">Bem-vindo de volta! 👋</h1>
+                        <p class="text-gray-500 dark:text-gray-400">Aqui está um resumo da atividade dos seus grupos</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button class="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span>Exportar</span>
+                        </button>
+                        <button class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors flex items-center gap-2 shadow-lg shadow-primary-500/30">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Novo Grupo</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">● Online</span>
-                    <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">
-                        + Novo Grupo
+                
+                <!-- Metrics Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 card-hover">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="users" class="w-6 h-6 text-primary-500"></i>
+                            </div>
+                            <span class="text-green-500 text-sm font-medium flex items-center gap-1">
+                                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                                +2
+                            </span>
+                        </div>
+                        <h3 class="text-3xl font-bold mb-1">5</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Grupos Ativos</p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 card-hover">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="message-circle" class="w-6 h-6 text-blue-500"></i>
+                            </div>
+                            <span class="text-green-500 text-sm font-medium flex items-center gap-1">
+                                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                                +18%
+                            </span>
+                        </div>
+                        <h3 class="text-3xl font-bold mb-1">1,847</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Mensagens (24h)</p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 card-hover">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="file-text" class="w-6 h-6 text-green-500"></i>
+                            </div>
+                            <span class="text-green-500 text-sm font-medium flex items-center gap-1">
+                                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                                +12%
+                            </span>
+                        </div>
+                        <h3 class="text-3xl font-bold mb-1">47</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Transcrições</p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 card-hover">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="wallet" class="w-6 h-6 text-amber-500"></i>
+                            </div>
+                            <span class="text-red-500 text-sm font-medium flex items-center gap-1">
+                                <i data-lucide="trending-down" class="w-4 h-4"></i>
+                                -5%
+                            </span>
+                        </div>
+                        <h3 class="text-3xl font-bold mb-1">R$ 89</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Custo Mensal</p>
+                    </div>
+                </div>
+                
+                <!-- Chart & Activity -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="font-semibold text-lg">Atividade dos Grupos</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Mensagens nos últimos 7 dias</p>
+                            </div>
+                            <div class="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                                <button class="px-3 py-1.5 text-sm font-medium rounded-md bg-white dark:bg-gray-600 shadow-sm">7 dias</button>
+                                <button class="px-3 py-1.5 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">30 dias</button>
+                                <button class="px-3 py-1.5 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">90 dias</button>
+                            </div>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                            <h3 class="font-semibold">Atividade Recente</h3>
+                            <button class="text-sm text-primary-500 hover:text-primary-600">Ver tudo</button>
+                        </div>
+                        <div class="p-4 space-y-4 max-h-72 overflow-y-auto">
+                            <div class="flex gap-3">
+                                <div class="w-9 h-9 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center text-purple-600 font-semibold text-sm flex-shrink-0">L</div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm"><strong>Liqi</strong> recebeu 23 novas mensagens</p>
+                                    <p class="text-xs text-gray-500">há 5 minutos</p>
+                                </div>
+                                <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">Hot 🔥</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <div class="w-9 h-9 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600 font-semibold text-sm flex-shrink-0">BI</div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm"><strong>BI Performance</strong> - transcrição concluída</p>
+                                    <p class="text-xs text-gray-500">há 12 minutos</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <div class="w-9 h-9 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600 font-semibold text-sm flex-shrink-0">R2</div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm"><strong>R2</strong> teve 3 novas menções ao bot</p>
+                                    <p class="text-xs text-gray-500">há 34 minutos</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <div class="w-9 h-9 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center text-amber-600 font-semibold text-sm flex-shrink-0">I</div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm"><strong>Iazis</strong> - relatório diário enviado</p>
+                                    <p class="text-xs text-gray-500">há 1 hora</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 card-hover cursor-pointer flex items-center gap-4">
+                        <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center">
+                            <i data-lucide="plus" class="w-6 h-6 text-primary-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Adicionar Grupo</h4>
+                            <p class="text-sm text-gray-500">Conecte um novo grupo WhatsApp</p>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 card-hover cursor-pointer flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                            <i data-lucide="bar-chart-3" class="w-6 h-6 text-blue-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Gerar Relatório</h4>
+                            <p class="text-sm text-gray-500">Exporte analytics em PDF</p>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 card-hover cursor-pointer flex items-center gap-4">
+                        <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                            <i data-lucide="settings" class="w-6 h-6 text-green-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Configurar Bot</h4>
+                            <p class="text-sm text-gray-500">Personalize respostas e comportamento</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Groups Grid -->
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-lg">Seus Grupos</h3>
+                        <button class="text-sm text-primary-500 hover:text-primary-600">Gerenciar</button>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center card-hover cursor-pointer">
+                            <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-3">L</div>
+                            <h4 class="font-semibold text-sm truncate">Liqi</h4>
+                            <p class="text-xs text-gray-500">847 msgs</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center card-hover cursor-pointer">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-3">BI</div>
+                            <h4 class="font-semibold text-sm truncate">BI Performance</h4>
+                            <p class="text-xs text-gray-500">423 msgs</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center card-hover cursor-pointer">
+                            <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-3">R2</div>
+                            <h4 class="font-semibold text-sm truncate">R2</h4>
+                            <p class="text-xs text-gray-500">156 msgs</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center card-hover cursor-pointer">
+                            <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-3">I</div>
+                            <h4 class="font-semibold text-sm truncate">Iazis</h4>
+                            <p class="text-xs text-gray-500">89 msgs</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center card-hover cursor-pointer">
+                            <div class="w-12 h-12 bg-gradient-to-br from-rose-400 to-rose-600 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-3">CB</div>
+                            <h4 class="font-semibold text-sm truncate">Cultura Builder</h4>
+                            <p class="text-xs text-gray-500">332 msgs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ==================== CHANNELS PAGE ==================== -->
+            <div id="page-channels" class="page p-8">
+                <div class="flex items-start justify-between mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-1">Grupos & Canais</h1>
+                        <p class="text-gray-500 dark:text-gray-400">Gerencie todos os seus grupos conectados</p>
+                    </div>
+                    <button class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors flex items-center gap-2 shadow-lg shadow-primary-500/30">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Conectar Grupo</span>
                     </button>
                 </div>
-            </header>
-
-            <!-- Content -->
-            <div class="p-8" id="main-content">
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-4 gap-6 mb-8">
-                    <div class="card bg-white rounded-xl p-6 border border-gray-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-2xl">📱</span>
-                            <span class="text-green-500 text-sm">+2</span>
-                        </div>
-                        <p class="text-3xl font-bold text-gray-900">5</p>
-                        <p class="text-sm text-gray-500">Grupos Ativos</p>
+                
+                <!-- Filters -->
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="flex-1 relative">
+                        <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" placeholder="Buscar grupos..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
                     </div>
-                    <div class="card bg-white rounded-xl p-6 border border-gray-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-2xl">💬</span>
-                            <span class="text-green-500 text-sm">↑ 23%</span>
-                        </div>
-                        <p class="text-3xl font-bold text-gray-900">1,847</p>
-                        <p class="text-sm text-gray-500">Mensagens (24h)</p>
-                    </div>
-                    <div class="card bg-white rounded-xl p-6 border border-gray-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-2xl">🎤</span>
-                            <span class="text-gray-400 text-sm">142 min</span>
-                        </div>
-                        <p class="text-3xl font-bold text-gray-900">89</p>
-                        <p class="text-sm text-gray-500">Transcrições</p>
-                    </div>
-                    <div class="card bg-white rounded-xl p-6 border border-gray-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-2xl">💰</span>
-                            <span class="text-gray-400 text-sm">de R$1.497</span>
-                        </div>
-                        <p class="text-3xl font-bold text-gray-900">R$ 847</p>
-                        <p class="text-sm text-gray-500">Uso este mês</p>
-                    </div>
+                    <select class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <option>Todos os canais</option>
+                        <option>WhatsApp</option>
+                        <option>Telegram</option>
+                        <option>Discord</option>
+                    </select>
+                    <select class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <option>Todos os status</option>
+                        <option>Ativo</option>
+                        <option>Pausado</option>
+                    </select>
                 </div>
-
-                <!-- Two Columns -->
-                <div class="grid grid-cols-3 gap-6">
-                    <!-- Chart Area -->
-                    <div class="col-span-2 bg-white rounded-xl p-6 border border-gray-200">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="font-semibold text-gray-900">Atividade (7 dias)</h3>
-                            <select class="text-sm border border-gray-200 rounded-lg px-3 py-1">
-                                <option>Última semana</option>
-                                <option>Último mês</option>
-                            </select>
-                        </div>
-                        <div class="h-64 flex items-end gap-2">
-                            <div class="flex-1 bg-indigo-100 rounded-t" style="height: 45%"></div>
-                            <div class="flex-1 bg-indigo-200 rounded-t" style="height: 65%"></div>
-                            <div class="flex-1 bg-indigo-300 rounded-t" style="height: 55%"></div>
-                            <div class="flex-1 bg-indigo-400 rounded-t" style="height: 80%"></div>
-                            <div class="flex-1 bg-indigo-500 rounded-t" style="height: 70%"></div>
-                            <div class="flex-1 bg-indigo-600 rounded-t" style="height: 90%"></div>
-                            <div class="flex-1 bg-indigo-700 rounded-t" style="height: 60%"></div>
-                        </div>
-                        <div class="flex justify-between mt-2 text-xs text-gray-400">
-                            <span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span>
-                        </div>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="bg-white rounded-xl p-6 border border-gray-200">
-                        <h3 class="font-semibold text-gray-900 mb-4">Atividade Recente</h3>
-                        <div class="space-y-4">
-                            <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-sm">✅</div>
-                                <div>
-                                    <p class="text-sm text-gray-900">Liqi - Equipe</p>
-                                    <p class="text-xs text-gray-500">47 mensagens respondidas</p>
-                                    <p class="text-xs text-gray-400">há 5 min</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">🎤</div>
-                                <div>
-                                    <p class="text-sm text-gray-900">BI Performance</p>
-                                    <p class="text-xs text-gray-500">Áudio transcrito (3:42)</p>
-                                    <p class="text-xs text-gray-400">há 12 min</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-sm">📄</div>
-                                <div>
-                                    <p class="text-sm text-gray-900">R2 Admin</p>
-                                    <p class="text-xs text-gray-500">PDF analisado</p>
-                                    <p class="text-xs text-gray-400">há 1 hora</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-sm">⚡</div>
-                                <div>
-                                    <p class="text-sm text-gray-900">Iazis</p>
-                                    <p class="text-xs text-gray-500">Especialista /code ativado</p>
-                                    <p class="text-xs text-gray-400">há 2 horas</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+                
                 <!-- Groups List -->
-                <div class="mt-6 bg-white rounded-xl border border-gray-200">
-                    <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-                        <h3 class="font-semibold text-gray-900">Grupos Conectados</h3>
-                        <input type="text" placeholder="Buscar..." class="text-sm border border-gray-200 rounded-lg px-3 py-2 w-64">
+                <div class="space-y-4">
+                    <!-- Group Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 card-hover">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center text-white text-2xl">📱</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="font-semibold text-lg">Liqi</h3>
+                                    <span class="bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                        Ativo
+                                    </span>
+                                    <span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs px-2 py-0.5 rounded-full">WhatsApp</span>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">847 mensagens hoje • 23 participantes</p>
+                            </div>
+                            <div class="flex items-center gap-6 text-sm">
+                                <div class="text-center">
+                                    <p class="font-semibold text-lg">847</p>
+                                    <p class="text-gray-500 text-xs">Mensagens</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="font-semibold text-lg">12</p>
+                                    <p class="text-gray-500 text-xs">Transcrições</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="font-semibold text-lg text-green-500">98%</p>
+                                    <p class="text-gray-500 text-xs">Uptime</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    <i data-lucide="settings" class="w-5 h-5 text-gray-400"></i>
+                                </button>
+                                <button class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    <i data-lucide="more-vertical" class="w-5 h-5 text-gray-400"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Group Card 2 -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 card-hover">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center text-white text-2xl">📊</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="font-semibold text-lg">BI Performance</h3>
+                                    <span class="bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                        Ativo
+                                    </span>
+                                    <span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs px-2 py-0.5 rounded-full">WhatsApp</span>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">423 mensagens hoje • 15 participantes</p>
+                            </div>
+                            <div class="flex items-center gap-6 text-sm">
+                                <div class="text-center">
+                                    <p class="font-semibold text-lg">423</p>
+                                    <p class="text-gray-500 text-xs">Mensagens</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="font-semibold text-lg">8</p>
+                                    <p class="text-gray-500 text-xs">Transcrições</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="font-semibold text-lg text-green-500">99%</p>
+                                    <p class="text-gray-500 text-xs">Uptime</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    <i data-lucide="settings" class="w-5 h-5 text-gray-400"></i>
+                                </button>
+                                <button class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    <i data-lucide="more-vertical" class="w-5 h-5 text-gray-400"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Group Card 3 - Paused -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 opacity-75 card-hover">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center text-white text-2xl">🔕</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="font-semibold text-lg">R2</h3>
+                                    <span class="bg-amber-100 text-amber-600 text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                                        Pausado
+                                    </span>
+                                    <span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs px-2 py-0.5 rounded-full">WhatsApp</span>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Bot pausado • 8 participantes</p>
+                            </div>
+                            <div class="flex items-center gap-6 text-sm">
+                                <div class="text-center">
+                                    <p class="font-semibold text-lg text-gray-400">-</p>
+                                    <p class="text-gray-500 text-xs">Mensagens</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="font-semibold text-lg text-gray-400">-</p>
+                                    <p class="text-gray-500 text-xs">Transcrições</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="font-semibold text-lg text-gray-400">-</p>
+                                    <p class="text-gray-500 text-xs">Uptime</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="px-3 py-1.5 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 transition-colors">
+                                    Reativar
+                                </button>
+                                <button class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    <i data-lucide="more-vertical" class="w-5 h-5 text-gray-400"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ==================== BEHAVIOR PAGE ==================== -->
+            <div id="page-behavior" class="page p-8">
+                <div class="flex items-start justify-between mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-1">Comportamento & Personalidade</h1>
+                        <p class="text-gray-500 dark:text-gray-400">Configure como seu bot interage com os usuários</p>
+                    </div>
+                    <button id="save-behavior-btn" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors flex items-center gap-2 shadow-lg shadow-primary-500/30">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        <span>Salvar alterações</span>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Left Column - Configuration -->
+                    <div class="space-y-6">
+                        <!-- Personality Templates -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 class="font-semibold text-lg mb-4">Templates de Personalidade</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 border-2 border-primary-500 rounded-xl cursor-pointer bg-primary-50 dark:bg-primary-900/20 relative">
+                                    <div class="absolute top-3 right-3 w-6 h-6 bg-primary-500 text-white rounded-full flex items-center justify-center text-xs">✓</div>
+                                    <div class="text-2xl mb-2">🎯</div>
+                                    <h4 class="font-semibold">Profissional</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Formal e objetivo</p>
+                                </div>
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer hover:border-primary-300 transition-colors">
+                                    <div class="text-2xl mb-2">😊</div>
+                                    <h4 class="font-semibold">Amigável</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Casual e acolhedor</p>
+                                </div>
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer hover:border-primary-300 transition-colors">
+                                    <div class="text-2xl mb-2">🎓</div>
+                                    <h4 class="font-semibold">Especialista</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Técnico e detalhado</p>
+                                </div>
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer hover:border-primary-300 transition-colors">
+                                    <div class="text-2xl mb-2">✨</div>
+                                    <h4 class="font-semibold">Personalizado</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Configure do zero</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Personality Sliders -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 class="font-semibold text-lg mb-4">Ajustes de Personalidade</h3>
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-sm font-medium">Formalidade</span>
+                                        <span class="text-sm text-primary-500 font-semibold">75%</span>
+                                    </div>
+                                    <input type="range" min="0" max="100" value="75" class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500">
+                                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                        <span>Casual</span>
+                                        <span>Formal</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-sm font-medium">Verbosidade</span>
+                                        <span class="text-sm text-primary-500 font-semibold">50%</span>
+                                    </div>
+                                    <input type="range" min="0" max="100" value="50" class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500">
+                                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                        <span>Conciso</span>
+                                        <span>Detalhado</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-sm font-medium">Emojis</span>
+                                        <span class="text-sm text-primary-500 font-semibold">30%</span>
+                                    </div>
+                                    <input type="range" min="0" max="100" value="30" class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500">
+                                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                        <span>Sem emojis</span>
+                                        <span>Muitos emojis</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom Instructions -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 class="font-semibold text-lg mb-4">Instruções Personalizadas</h3>
+                            <textarea 
+                                class="w-full h-32 p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none code-editor"
+                                placeholder="Você é um assistente da empresa Liqi. Responda sempre de forma profissional e direta. Quando não souber algo, indique que vai verificar..."
+                            >Você é um assistente da empresa Liqi. Responda sempre de forma profissional e direta.
+
+Regras:
+- Nunca invente informações
+- Seja conciso mas completo
+- Use linguagem técnica quando apropriado
+- Indique quando precisa verificar algo</textarea>
+                            <p class="text-xs text-gray-500 mt-2">Estas instruções são enviadas ao modelo em toda interação</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column - Preview/Sandbox -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-[600px]">
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 bg-green-500 rounded-full pulse"></span>
+                                <h3 class="font-semibold">Sandbox - Teste seu bot</h3>
+                            </div>
+                            <button onclick="clearChat()" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-1">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                Limpar
+                            </button>
+                        </div>
+                        
+                        <!-- Chat Area -->
+                        <div id="sandbox-chat" class="flex-1 p-4 overflow-y-auto space-y-4">
+                            <div class="flex justify-start">
+                                <div class="chat-bubble-bot max-w-[80%] px-4 py-3">
+                                    <p class="text-sm">Olá! Sou o assistente da Liqi. Como posso ajudar você hoje?</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat Input -->
+                        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                            <div class="flex gap-2">
+                                <input 
+                                    type="text" 
+                                    id="sandbox-input"
+                                    placeholder="Digite uma mensagem para testar..."
+                                    class="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    onkeypress="if(event.key==='Enter') sendSandboxMessage()"
+                                >
+                                <button onclick="sendSandboxMessage()" class="px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors">
+                                    <i data-lucide="send" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <div class="flex gap-2 mt-2">
+                                <button onclick="sendQuickMessage('Qual o horário de funcionamento?')" class="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    Qual o horário de funcionamento?
+                                </button>
+                                <button onclick="sendQuickMessage('Como funciona a plataforma?')" class="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    Como funciona?
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ==================== FEATURES PAGE ==================== -->
+            <div id="page-features" class="page p-8">
+                <div class="flex items-start justify-between mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-1">Funcionalidades</h1>
+                        <p class="text-gray-500 dark:text-gray-400">Ative e configure recursos do seu bot</p>
+                    </div>
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/30 text-primary-600 rounded-lg">
+                        <i data-lucide="zap" class="w-4 h-4"></i>
+                        <span class="text-sm font-medium">4 de 8 ativos</span>
+                    </div>
+                </div>
+                
+                <!-- Feature Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Feature Card - Active -->
+                    <div class="feature-card enabled bg-white dark:bg-gray-800 rounded-xl border-2 border-primary-500 p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="mic" class="w-6 h-6 text-primary-500"></i>
+                            </div>
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">Transcrição de Áudio</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Converte mensagens de voz em texto automaticamente</p>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-green-500 flex items-center gap-1">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                Ativo
+                            </span>
+                            <span class="text-gray-500">47 transcrições hoje</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Feature Card - Active -->
+                    <div class="feature-card enabled bg-white dark:bg-gray-800 rounded-xl border-2 border-primary-500 p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="file-text" class="w-6 h-6 text-blue-500"></i>
+                            </div>
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">Resumo de Conversas</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Gera resumos automáticos das conversas diárias</p>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-green-500 flex items-center gap-1">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                Ativo
+                            </span>
+                            <span class="text-gray-500">5 resumos gerados</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Feature Card - Inactive -->
+                    <div class="feature-card bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                                <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
+                            </div>
+                            <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">Análise de Imagens</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Descreve e analisa imagens enviadas no grupo</p>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500 flex items-center gap-1">
+                                <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
+                                Desativado
+                            </span>
+                            <span class="text-gray-500">+R$ 15/mês</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Feature Card - Coming Soon -->
+                    <div class="feature-card bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 opacity-75">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="video" class="w-6 h-6 text-purple-500"></i>
+                            </div>
+                            <span class="bg-gradient-to-r from-primary-500 to-purple-500 text-white text-xs px-2 py-1 rounded-full">Em breve</span>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">Transcrição de Vídeo</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Extrai e transcreve áudio de vídeos enviados</p>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">Disponível em breve</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Feature Card - Active -->
+                    <div class="feature-card enabled bg-white dark:bg-gray-800 rounded-xl border-2 border-primary-500 p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="calendar" class="w-6 h-6 text-green-500"></i>
+                            </div>
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">Agendamentos</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Permite agendar reuniões e lembretes via chat</p>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-green-500 flex items-center gap-1">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                Ativo
+                            </span>
+                            <span class="text-gray-500">12 agendamentos</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Feature Card - Active -->
+                    <div class="feature-card enabled bg-white dark:bg-gray-800 rounded-xl border-2 border-primary-500 p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="bell" class="w-6 h-6 text-amber-500"></i>
+                            </div>
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">Notificações Inteligentes</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Envia alertas baseados em palavras-chave</p>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-green-500 flex items-center gap-1">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                Ativo
+                            </span>
+                            <span class="text-gray-500">34 alertas enviados</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ==================== INTEGRATIONS PAGE ==================== -->
+            <div id="page-integrations" class="page p-8">
+                <div class="flex items-start justify-between mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-1">Integrações</h1>
+                        <p class="text-gray-500 dark:text-gray-400">Conecte seu bot com suas ferramentas favoritas</p>
+                    </div>
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-lg">
+                        <span class="w-2 h-2 bg-green-500 rounded-full pulse"></span>
+                        <span class="text-sm font-medium">2 conectadas</span>
+                    </div>
+                </div>
+                
+                <!-- Connected Integrations -->
+                <div class="mb-8">
+                    <h3 class="font-semibold text-sm text-gray-500 mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Conectadas
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="integration-card bg-white dark:bg-gray-800 rounded-xl border-2 border-green-200 dark:border-green-800 p-5 cursor-pointer">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border">
+                                    <svg class="w-7 h-7" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12c0-.77-.07-1.5-.19-2.22H12v4.2h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.09-1.92 3.29-4.76 3.29-8.06z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                                </div>
+                                <span class="text-xs text-green-600 font-medium flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                    Conectado
+                                </span>
+                            </div>
+                            <h4 class="font-semibold mb-1">Google Calendar</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Sincronize eventos e crie reuniões</p>
+                            <div class="h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-green-500 rounded-full" style="width: 99%"></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">99.9% uptime</p>
+                        </div>
+                        
+                        <div class="integration-card bg-white dark:bg-gray-800 rounded-xl border-2 border-green-200 dark:border-green-800 p-5 cursor-pointer">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                    <span class="text-white text-xl">📋</span>
+                                </div>
+                                <span class="text-xs text-green-600 font-medium flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                    Conectado
+                                </span>
+                            </div>
+                            <h4 class="font-semibold mb-1">ClickUp</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Gerencie tarefas e projetos via chat</p>
+                            <div class="h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-green-500 rounded-full" style="width: 95%"></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">95% uptime</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Available Integrations -->
+                <div>
+                    <h3 class="font-semibold text-sm text-gray-500 mb-4">Disponíveis</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="integration-card bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 cursor-pointer">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="w-12 h-12 bg-[#4A154B] rounded-xl flex items-center justify-center">
+                                    <span class="text-white text-xl">#</span>
+                                </div>
+                            </div>
+                            <h4 class="font-semibold mb-1">Slack</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Receba notificações no Slack</p>
+                            <button class="w-full py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                Conectar
+                            </button>
+                        </div>
+                        
+                        <div class="integration-card bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 cursor-pointer">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="w-12 h-12 bg-[#FF4500] rounded-xl flex items-center justify-center">
+                                    <span class="text-white text-xl">📊</span>
+                                </div>
+                            </div>
+                            <h4 class="font-semibold mb-1">Notion</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Salve dados direto no Notion</p>
+                            <button class="w-full py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                Conectar
+                            </button>
+                        </div>
+                        
+                        <div class="integration-card bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 cursor-pointer">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="w-12 h-12 bg-[#0052CC] rounded-xl flex items-center justify-center">
+                                    <span class="text-white text-xl">📦</span>
+                                </div>
+                            </div>
+                            <h4 class="font-semibold mb-1">Jira</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Crie issues via mensagens</p>
+                            <button class="w-full py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                Conectar
+                            </button>
+                        </div>
+                        
+                        <div class="integration-card bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 cursor-pointer">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center">
+                                    <span class="text-white text-xl">⚡</span>
+                                </div>
+                            </div>
+                            <h4 class="font-semibold mb-1">Zapier</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Conecte a +5000 apps</p>
+                            <button class="w-full py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                Conectar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ==================== BILLING PAGE ==================== -->
+            <div id="page-billing" class="page p-8">
+                <div class="flex items-start justify-between mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-1">Faturamento</h1>
+                        <p class="text-gray-500 dark:text-gray-400">Gerencie sua assinatura e pagamentos</p>
+                    </div>
+                </div>
+                
+                <!-- Current Plan -->
+                <div class="bg-gradient-to-r from-primary-500 to-purple-600 rounded-2xl p-6 text-white mb-8">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-sm opacity-80">Plano atual</span>
+                            <h2 class="text-3xl font-bold mt-1 mb-2">Business</h2>
+                            <p class="opacity-80 mb-4">Próximo pagamento: 15 de Fev, 2025</p>
+                            <div class="flex items-center gap-4">
+                                <div>
+                                    <p class="text-2xl font-bold">R$ 199<span class="text-base font-normal">/mês</span></p>
+                                </div>
+                                <button class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-sm">
+                                    Upgrade para Enterprise
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center text-4xl">
+                                💎
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Usage Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-sm text-gray-500">Mensagens</span>
+                            <span class="text-sm font-medium">8,432 / 10,000</span>
+                        </div>
+                        <div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-2">
+                            <div class="h-full bg-primary-500 rounded-full" style="width: 84%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500">84% utilizado</p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-sm text-gray-500">Transcrições</span>
+                            <span class="text-sm font-medium">47 / 100</span>
+                        </div>
+                        <div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-2">
+                            <div class="h-full bg-blue-500 rounded-full" style="width: 47%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500">47% utilizado</p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-sm text-gray-500">Grupos</span>
+                            <span class="text-sm font-medium">5 / 10</span>
+                        </div>
+                        <div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-2">
+                            <div class="h-full bg-green-500 rounded-full" style="width: 50%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500">50% utilizado</p>
+                    </div>
+                </div>
+                
+                <!-- Payment History -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="font-semibold">Histórico de Pagamentos</h3>
                     </div>
                     <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr class="text-left text-sm text-gray-500">
-                                <th class="px-6 py-3 font-medium">Grupo</th>
-                                <th class="px-6 py-3 font-medium">Canal</th>
-                                <th class="px-6 py-3 font-medium">Status</th>
-                                <th class="px-6 py-3 font-medium">Msgs (24h)</th>
-                                <th class="px-6 py-3 font-medium">Personalidade</th>
-                                <th class="px-6 py-3 font-medium"></th>
+                        <thead class="bg-gray-50 dark:bg-gray-700/50">
+                            <tr>
+                                <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Data</th>
+                                <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Descrição</th>
+                                <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Valor</th>
+                                <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Status</th>
+                                <th class="text-right text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Ações</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">🏦</div>
-                                        <div>
-                                            <p class="font-medium text-gray-900">Liqi - Equipe</p>
-                                            <p class="text-xs text-gray-500">30 membros</p>
-                                        </div>
-                                    </div>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <td class="px-6 py-4 text-sm">15 Jan 2025</td>
+                                <td class="px-6 py-4 text-sm">Plano Business - Mensal</td>
+                                <td class="px-6 py-4 text-sm font-medium">R$ 199,00</td>
+                                <td class="px-6 py-4"><span class="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">Pago</span></td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="text-primary-500 hover:text-primary-600 text-sm">Baixar NF</button>
                                 </td>
-                                <td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">WhatsApp</span></td>
-                                <td class="px-6 py-4"><span class="flex items-center gap-2 text-green-600 text-sm">● Ativo</span></td>
-                                <td class="px-6 py-4 text-gray-900">847</td>
-                                <td class="px-6 py-4 text-gray-500 text-sm">Fintech Técnico</td>
-                                <td class="px-6 py-4"><button class="text-indigo-600 text-sm">Editar</button></td>
                             </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">📊</div>
-                                        <div>
-                                            <p class="font-medium text-gray-900">BI Performance</p>
-                                            <p class="text-xs text-gray-500">12 membros</p>
-                                        </div>
-                                    </div>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <td class="px-6 py-4 text-sm">15 Dez 2024</td>
+                                <td class="px-6 py-4 text-sm">Plano Business - Mensal</td>
+                                <td class="px-6 py-4 text-sm font-medium">R$ 199,00</td>
+                                <td class="px-6 py-4"><span class="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">Pago</span></td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="text-primary-500 hover:text-primary-600 text-sm">Baixar NF</button>
                                 </td>
-                                <td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">WhatsApp</span></td>
-                                <td class="px-6 py-4"><span class="flex items-center gap-2 text-green-600 text-sm">● Ativo</span></td>
-                                <td class="px-6 py-4 text-gray-900">423</td>
-                                <td class="px-6 py-4 text-gray-500 text-sm">Consultoria</td>
-                                <td class="px-6 py-4"><button class="text-indigo-600 text-sm">Editar</button></td>
                             </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">🏠</div>
-                                        <div>
-                                            <p class="font-medium text-gray-900">R2 Admin</p>
-                                            <p class="text-xs text-gray-500">8 membros</p>
-                                        </div>
-                                    </div>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <td class="px-6 py-4 text-sm">15 Nov 2024</td>
+                                <td class="px-6 py-4 text-sm">Plano Business - Mensal</td>
+                                <td class="px-6 py-4 text-sm font-medium">R$ 199,00</td>
+                                <td class="px-6 py-4"><span class="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">Pago</span></td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="text-primary-500 hover:text-primary-600 text-sm">Baixar NF</button>
                                 </td>
-                                <td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">WhatsApp</span></td>
-                                <td class="px-6 py-4"><span class="flex items-center gap-2 text-green-600 text-sm">● Ativo</span></td>
-                                <td class="px-6 py-4 text-gray-900">156</td>
-                                <td class="px-6 py-4 text-gray-500 text-sm">Proptech</td>
-                                <td class="px-6 py-4"><button class="text-indigo-600 text-sm">Editar</button></td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">🤖</div>
-                                        <div>
-                                            <p class="font-medium text-gray-900">Iazis</p>
-                                            <p class="text-xs text-gray-500">5 membros</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">WhatsApp</span></td>
-                                <td class="px-6 py-4"><span class="flex items-center gap-2 text-yellow-600 text-sm">● Lurk</span></td>
-                                <td class="px-6 py-4 text-gray-900">89</td>
-                                <td class="px-6 py-4 text-gray-500 text-sm">AI Solutions</td>
-                                <td class="px-6 py-4"><button class="text-indigo-600 text-sm">Editar</button></td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">🏗️</div>
-                                        <div>
-                                            <p class="font-medium text-gray-900">Cultura Builder</p>
-                                            <p class="text-xs text-gray-500">6.000 membros</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">WhatsApp</span></td>
-                                <td class="px-6 py-4"><span class="flex items-center gap-2 text-yellow-600 text-sm">● Lurk</span></td>
-                                <td class="px-6 py-4 text-gray-900">332</td>
-                                <td class="px-6 py-4 text-gray-500 text-sm">Comunidade</td>
-                                <td class="px-6 py-4"><button class="text-indigo-600 text-sm">Editar</button></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-
-            <!-- Behavior Section (hidden by default) -->
-            <div class="p-8 hidden" id="behavior-section">
-                <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-                    <h3 class="font-semibold text-gray-900 mb-6">Configuração de Personalidade</h3>
+            
+            <!-- ==================== ADMIN PAGE ==================== -->
+            <div id="page-admin" class="page p-8">
+                <div class="flex items-start justify-between mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-1">Administração</h1>
+                        <p class="text-gray-500 dark:text-gray-400">Configurações gerais da conta</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Settings Menu -->
+                    <div class="space-y-2">
+                        <button class="w-full flex items-center gap-3 p-3 bg-primary-50 dark:bg-primary-900/30 text-primary-600 rounded-lg font-medium">
+                            <i data-lucide="building" class="w-5 h-5"></i>
+                            Empresa
+                        </button>
+                        <button class="w-full flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                            Membros da Equipe
+                        </button>
+                        <button class="w-full flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
+                            <i data-lucide="shield" class="w-5 h-5"></i>
+                            Segurança
+                        </button>
+                        <button class="w-full flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
+                            <i data-lucide="key" class="w-5 h-5"></i>
+                            API Keys
+                        </button>
+                        <button class="w-full flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
+                            <i data-lucide="webhook" class="w-5 h-5"></i>
+                            Webhooks
+                        </button>
+                        <button class="w-full flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                            Logs de Auditoria
+                        </button>
+                    </div>
                     
-                    <!-- Templates -->
-                    <div class="mb-8">
-                        <label class="text-sm font-medium text-gray-700 mb-3 block">Template Base</label>
-                        <div class="grid grid-cols-4 gap-4">
-                            <div class="border-2 border-indigo-500 rounded-xl p-4 cursor-pointer bg-indigo-50">
-                                <div class="text-2xl mb-2">🏦</div>
-                                <p class="font-medium text-gray-900">Fintech</p>
-                                <p class="text-xs text-gray-500">Técnico e formal</p>
-                            </div>
-                            <div class="border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-indigo-300">
-                                <div class="text-2xl mb-2">🛒</div>
-                                <p class="font-medium text-gray-900">E-commerce</p>
-                                <p class="text-xs text-gray-500">Vendas e suporte</p>
-                            </div>
-                            <div class="border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-indigo-300">
-                                <div class="text-2xl mb-2">💼</div>
-                                <p class="font-medium text-gray-900">Consultoria</p>
-                                <p class="text-xs text-gray-500">Profissional</p>
-                            </div>
-                            <div class="border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-indigo-300">
-                                <div class="text-2xl mb-2">🎨</div>
-                                <p class="font-medium text-gray-900">Custom</p>
-                                <p class="text-xs text-gray-500">Personalizado</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sliders -->
-                    <div class="grid grid-cols-2 gap-8 mb-8">
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <label class="text-sm font-medium text-gray-700">Formalidade</label>
-                                <span class="text-sm text-indigo-600">75%</span>
-                            </div>
-                            <input type="range" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value="75">
-                            <div class="flex justify-between text-xs text-gray-400 mt-1">
-                                <span>Casual</span>
-                                <span>Formal</span>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <label class="text-sm font-medium text-gray-700">Tecnicidade</label>
-                                <span class="text-sm text-indigo-600">90%</span>
-                            </div>
-                            <input type="range" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value="90">
-                            <div class="flex justify-between text-xs text-gray-400 mt-1">
-                                <span>Simples</span>
-                                <span>Técnico</span>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <label class="text-sm font-medium text-gray-700">Proatividade</label>
-                                <span class="text-sm text-indigo-600">30%</span>
-                            </div>
-                            <input type="range" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value="30">
-                            <div class="flex justify-between text-xs text-gray-400 mt-1">
-                                <span>Reativo</span>
-                                <span>Proativo</span>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <label class="text-sm font-medium text-gray-700">Empatia</label>
-                                <span class="text-sm text-indigo-600">60%</span>
-                            </div>
-                            <input type="range" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value="60">
-                            <div class="flex justify-between text-xs text-gray-400 mt-1">
-                                <span>Direto</span>
-                                <span>Empático</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- System Prompt -->
-                    <div class="mb-6">
-                        <label class="text-sm font-medium text-gray-700 mb-2 block">System Prompt</label>
-                        <textarea class="w-full h-32 border border-gray-200 rounded-lg p-4 text-sm" placeholder="Você é um assistente especializado em...">Você é Lobo, um assistente de IA da Liqi. Seu papel é ajudar a equipe com informações sobre tokenização, mercado de capitais e operações da empresa. Seja técnico mas acessível. Use dados quando disponíveis. Mantenha tom profissional.</textarea>
-                    </div>
-
-                    <!-- Preview -->
-                    <div class="bg-gray-50 rounded-xl p-4">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="text-sm font-medium text-gray-700">💬 Preview</span>
-                            <span class="text-xs text-gray-400">Como o bot responderia</span>
-                        </div>
-                        <div class="bg-white rounded-lg p-4 border border-gray-200">
-                            <div class="flex gap-3 mb-4">
-                                <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
-                                <div class="bg-gray-100 rounded-lg p-3 text-sm">
-                                    "Como funciona a tokenização de recebíveis?"
+                    <!-- Settings Content -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 class="font-semibold text-lg mb-6">Informações da Empresa</h3>
+                            
+                            <div class="space-y-6">
+                                <div class="flex items-center gap-6">
+                                    <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-2xl flex items-center justify-center text-white text-3xl font-bold">
+                                        L
+                                    </div>
+                                    <div>
+                                        <button class="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                            Alterar logo
+                                        </button>
+                                        <p class="text-xs text-gray-500 mt-1">PNG, JPG até 2MB</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Nome da Empresa</label>
+                                        <input type="text" value="Liqi" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Slug</label>
+                                        <input type="text" value="liqi" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Email de Contato</label>
+                                    <input type="email" value="contato@liqi.com.br" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Fuso Horário</label>
+                                    <select class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option>America/Sao_Paulo (GMT-3)</option>
+                                        <option>America/New_York (GMT-5)</option>
+                                        <option>Europe/London (GMT+0)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <button class="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors font-medium">
+                                        Salvar alterações
+                                    </button>
                                 </div>
                             </div>
-                            <div class="flex gap-3 justify-end">
-                                <div class="bg-indigo-600 text-white rounded-lg p-3 text-sm max-w-md">
-                                    "A tokenização de recebíveis na Liqi funciona através da nossa infraestrutura de securitização. Basicamente, transformamos direitos creditórios em tokens digitais na blockchain, permitindo fracionamento e liquidez. Quer que eu detalhe o fluxo técnico ou os aspectos regulatórios?"
+                        </div>
+                        
+                        <!-- Danger Zone -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl border border-red-200 dark:border-red-800 p-6 mt-6">
+                            <h3 class="font-semibold text-lg text-red-600 mb-4">Zona de Perigo</h3>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium">Excluir conta</p>
+                                    <p class="text-sm text-gray-500">Esta ação é irreversível</p>
                                 </div>
-                                <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-sm">🐺</div>
+                                <button class="px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+                                    Excluir conta
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            
         </main>
     </div>
-
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+    
     <script>
-        function showSection(section) {
-            document.getElementById('main-content').classList.add('hidden');
-            document.getElementById('behavior-section').classList.add('hidden');
+        // Initialize Lucide Icons
+        lucide.createIcons();
+        
+        // ==================== STATE MANAGEMENT ====================
+        const state = {
+            currentPage: 'overview',
+            sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
+            darkMode: localStorage.getItem('darkMode') === 'true'
+        };
+        
+        // ==================== DARK MODE ====================
+        function toggleDarkMode() {
+            state.darkMode = !state.darkMode;
+            localStorage.setItem('darkMode', state.darkMode);
+            updateDarkMode();
+        }
+        
+        function updateDarkMode() {
+            document.documentElement.classList.toggle('dark', state.darkMode);
+            const toggle = document.getElementById('dark-mode-toggle');
+            toggle.classList.toggle('active', state.darkMode);
+        }
+        
+        // Initialize dark mode
+        updateDarkMode();
+        
+        // ==================== SIDEBAR ====================
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const collapseBtn = document.getElementById('collapse-btn');
+        
+        function toggleSidebar() {
+            state.sidebarCollapsed = !state.sidebarCollapsed;
+            localStorage.setItem('sidebarCollapsed', state.sidebarCollapsed);
+            updateSidebar();
+        }
+        
+        function updateSidebar() {
+            sidebar.classList.toggle('collapsed', state.sidebarCollapsed);
+            mainContent.style.marginLeft = state.sidebarCollapsed ? '80px' : '256px';
+        }
+        
+        collapseBtn.addEventListener('click', toggleSidebar);
+        
+        // Initialize sidebar state
+        updateSidebar();
+        
+        // ==================== ROUTING ====================
+        function navigateTo(page) {
+            state.currentPage = page;
             
-            if (section === 'behavior') {
-                document.getElementById('behavior-section').classList.remove('hidden');
-            } else {
-                document.getElementById('main-content').classList.remove('hidden');
+            // Update URL hash
+            window.location.hash = page;
+            
+            // Update pages
+            document.querySelectorAll('.page').forEach(p => {
+                p.classList.remove('active');
+            });
+            const targetPage = document.getElementById(`page-${page}`);
+            if (targetPage) {
+                targetPage.classList.add('active');
             }
             
-            // Update sidebar
-            document.querySelectorAll('.sidebar-item').forEach(item => {
-                item.classList.remove('active', 'text-indigo-600');
-                item.classList.add('text-gray-600');
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.page === page) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Re-initialize icons for the new page
+            lucide.createIcons();
+            
+            // Initialize charts if on overview
+            if (page === 'overview') {
+                setTimeout(initCharts, 100);
+            }
+        }
+        
+        // Handle nav clicks
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = item.dataset.page;
+                if (page) {
+                    navigateTo(page);
+                }
+            });
+        });
+        
+        // Handle hash changes
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.slice(1) || 'overview';
+            navigateTo(hash);
+        });
+        
+        // Initialize on page load
+        const initialPage = window.location.hash.slice(1) || 'overview';
+        navigateTo(initialPage);
+        
+        // ==================== CHARTS ====================
+        let activityChart = null;
+        
+        function initCharts() {
+            const ctx = document.getElementById('activityChart');
+            if (!ctx) return;
+            
+            // Destroy existing chart
+            if (activityChart) {
+                activityChart.destroy();
+            }
+            
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            activityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                    datasets: [
+                        {
+                            label: 'Liqi',
+                            data: [120, 145, 132, 167, 142, 89, 152],
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                        },
+                        {
+                            label: 'BI Performance',
+                            data: [65, 78, 52, 89, 67, 45, 72],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: isDark ? '#9ca3af' : '#6b7280',
+                                usePointStyle: true,
+                                padding: 20,
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1f2937' : '#ffffff',
+                            titleColor: isDark ? '#ffffff' : '#111827',
+                            bodyColor: isDark ? '#9ca3af' : '#6b7280',
+                            borderColor: isDark ? '#374151' : '#e5e7eb',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            padding: 12,
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: isDark ? '#9ca3af' : '#6b7280' }
+                        },
+                        y: {
+                            grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+                            ticks: { color: isDark ? '#9ca3af' : '#6b7280' }
+                        }
+                    }
+                }
             });
         }
+        
+        // ==================== SANDBOX CHAT ====================
+        function sendSandboxMessage() {
+            const input = document.getElementById('sandbox-input');
+            const chat = document.getElementById('sandbox-chat');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            const userBubble = document.createElement('div');
+            userBubble.className = 'flex justify-end';
+            userBubble.innerHTML = `
+                <div class="chat-bubble-user max-w-[80%] px-4 py-3">
+                    <p class="text-sm">${message}</p>
+                </div>
+            `;
+            chat.appendChild(userBubble);
+            
+            input.value = '';
+            
+            // Scroll to bottom
+            chat.scrollTop = chat.scrollHeight;
+            
+            // Simulate typing
+            const typingBubble = document.createElement('div');
+            typingBubble.className = 'flex justify-start typing-indicator';
+            typingBubble.innerHTML = `
+                <div class="chat-bubble-bot px-4 py-3 flex gap-1">
+                    <span class="typing-dot w-2 h-2 bg-white/60 rounded-full"></span>
+                    <span class="typing-dot w-2 h-2 bg-white/60 rounded-full"></span>
+                    <span class="typing-dot w-2 h-2 bg-white/60 rounded-full"></span>
+                </div>
+            `;
+            chat.appendChild(typingBubble);
+            chat.scrollTop = chat.scrollHeight;
+            
+            // Simulate bot response
+            setTimeout(() => {
+                chat.removeChild(typingBubble);
+                
+                const responses = [
+                    'Entendi sua pergunta! Deixa eu verificar isso para você.',
+                    'Ótima pergunta! Aqui está o que encontrei...',
+                    'Claro, posso ajudar com isso. Veja as informações abaixo.',
+                    'Já estou buscando essas informações para você!'
+                ];
+                
+                const botBubble = document.createElement('div');
+                botBubble.className = 'flex justify-start';
+                botBubble.innerHTML = `
+                    <div class="chat-bubble-bot max-w-[80%] px-4 py-3">
+                        <p class="text-sm">${responses[Math.floor(Math.random() * responses.length)]}</p>
+                    </div>
+                `;
+                chat.appendChild(botBubble);
+                chat.scrollTop = chat.scrollHeight;
+            }, 1500);
+        }
+        
+        function sendQuickMessage(msg) {
+            document.getElementById('sandbox-input').value = msg;
+            sendSandboxMessage();
+        }
+        
+        function clearChat() {
+            const chat = document.getElementById('sandbox-chat');
+            chat.innerHTML = `
+                <div class="flex justify-start">
+                    <div class="chat-bubble-bot max-w-[80%] px-4 py-3">
+                        <p class="text-sm">Olá! Sou o assistente da Liqi. Como posso ajudar você hoje?</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ==================== TOASTS ====================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500',
+                warning: 'bg-amber-500'
+            };
+            
+            toast.className = `toast ${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check' : 'info'}" class="w-5 h-5"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => container.removeChild(toast), 300);
+            }, 3000);
+        }
+        
+        // Save behavior button
+        document.getElementById('save-behavior-btn')?.addEventListener('click', () => {
+            showToast('Configurações salvas com sucesso!', 'success');
+        });
+        
+        // ==================== KEYBOARD SHORTCUTS ====================
+        document.addEventListener('keydown', (e) => {
+            // Cmd/Ctrl + B = Toggle sidebar
+            if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
+                e.preventDefault();
+                toggleSidebar();
+            }
+            
+            // Cmd/Ctrl + K = Search (placeholder)
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                showToast('Busca em desenvolvimento', 'info');
+            }
+        });
+        
+        // ==================== INITIALIZE ====================
+        // Initialize charts on first load if on overview
+        if (state.currentPage === 'overview') {
+            setTimeout(initCharts, 100);
+        }
+        
+        console.log('%c🤖 BaaS Dashboard', 'font-size: 24px; font-weight: bold; color: #6366f1;');
+        console.log('%cPressione ⌘+B para colapsar a sidebar', 'color: #9ca3af;');
     </script>
 </body>
 </html>

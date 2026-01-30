@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funcionalidades Premium - BaaS Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item:hover { background: rgba(99, 102, 241, 0.1); }
+        .sidebar-item.active { background: rgba(99, 102, 241, 0.15); border-right: 3px solid #6366f1; }
+        
+        /* Feature Card Styles */
+        .feature-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+        .feature-card:hover {
+            border-color: #a5b4fc;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.1);
+        }
+        .feature-card.enabled {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.02) 0%, rgba(99, 102, 241, 0.05) 100%);
+        }
+        
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            background: #e5e7eb;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .toggle-switch.active {
+            background: #6366f1;
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .toggle-switch.active::after {
+            left: 24px;
+        }
+        
+        /* Inheritance Badge */
+        .inheritance-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .inheritance-global {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        .inheritance-override {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        /* Coming Soon Badge */
+        .coming-soon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 10px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Accordion */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-content.open {
+            max-height: 500px;
+        }
+        
+        /* Tooltip */
+        .tooltip-container {
+            position: relative;
+        }
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 100;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+        }
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #1f2937;
+        }
+        .tooltip-container:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Cost Indicator */
+        .cost-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .cost-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #d1d5db;
+        }
+        .cost-dot.active {
+            background: #22c55e;
+        }
+        .cost-dot.high {
+            background: #f59e0b;
+        }
+        .cost-dot.very-high {
+            background: #ef4444;
+        }
+        
+        /* Category Tabs */
+        .category-tab {
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .category-tab:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .category-tab.active {
+            background: #6366f1;
+            color: white;
+        }
+        
+        /* Drawer */
+        .drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .drawer-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .drawer {
+            position: fixed;
+            right: -480px;
+            top: 0;
+            bottom: 0;
+            width: 480px;
+            background: white;
+            box-shadow: -10px 0 40px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            z-index: 1001;
+            overflow-y: auto;
+        }
+        .drawer.open {
+            right: 0;
+        }
+        
+        /* Pulse animation for new features */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+        .pulse-indicator::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: #6366f1;
+            animation: pulse-ring 1.5s ease-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white text-xl">🤖</span>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-gray-900">BaaS</h1>
+                        <p class="text-xs text-gray-500">Brand Voice AI</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex-1 p-4">
+                <ul class="space-y-1">
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
+                        <span>🏠</span> Overview
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
+                        <span>📱</span> Grupos & Canais
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
+                        <span>🎭</span> Comportamento
+                    </li>
+                    <li class="sidebar-item active rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-indigo-600">
+                        <span>⚡</span> Funcionalidades
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
+                        <span>🔌</span> Integrações
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
+                        <span>💰</span> Billing
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
+                        <span>⚙️</span> Admin
+                    </li>
+                </ul>
+            </nav>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Liqi</p>
+                        <p class="text-xs text-gray-500">Business Plan</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-auto">
+            <!-- Header -->
+            <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between sticky top-0 z-50">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Funcionalidades Premium</h2>
+                    <p class="text-sm text-gray-500">Configure os recursos de IA do seu bot</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
+                        <span class="text-sm text-gray-600">Custo estimado:</span>
+                        <span class="text-sm font-semibold text-indigo-600">~R$ 0,12/msg</span>
+                        <div class="tooltip-container">
+                            <span class="text-gray-400 cursor-help">ⓘ</span>
+                            <div class="tooltip">Baseado nas features ativas e uso médio</div>
+                        </div>
+                    </div>
+                    <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors">
+                        💾 Salvar Alterações
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scope Selector -->
+            <div class="bg-white border-b border-gray-200 px-8 py-4">
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-medium text-gray-700">Aplicar a:</span>
+                    <select id="scope-selector" class="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="global">🌐 Configuração Global (todos os grupos)</option>
+                        <option value="liqi">🏦 Liqi - Equipe</option>
+                        <option value="bi">📊 BI Performance</option>
+                        <option value="r2">🏠 R2 Admin</option>
+                        <option value="iazis">🤖 Iazis</option>
+                    </select>
+                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <span class="inheritance-badge inheritance-global">Global</span>
+                        <span>= herda config global</span>
+                        <span class="inheritance-badge inheritance-override ml-2">Override</span>
+                        <span>= config própria</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="px-8 pt-6">
+                <div class="flex items-center gap-2 bg-gray-100 p-1.5 rounded-xl w-fit">
+                    <button class="category-tab active" onclick="showCategory('all', this)">
+                        Todas
+                    </button>
+                    <button class="category-tab" onclick="showCategory('core', this)">
+                        🎯 Core
+                    </button>
+                    <button class="category-tab" onclick="showCategory('ai', this)">
+                        🧠 AI Avançada
+                    </button>
+                    <button class="category-tab" onclick="showCategory('integrations', this)">
+                        🔌 Integrações
+                    </button>
+                    <button class="category-tab" onclick="showCategory('advanced', this)">
+                        ⚡ Avançado
+                    </button>
+                </div>
+            </div>
+
+            <!-- Features Content -->
+            <div class="p-8">
+                <!-- Core Features -->
+                <div class="mb-8" data-category="core">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl">🎯</span>
+                        <h3 class="text-lg font-semibold text-gray-900">Core</h3>
+                        <span class="text-sm text-gray-500">Funcionalidades essenciais</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <!-- Respostas Contextuais -->
+                        <div class="feature-card enabled bg-white rounded-2xl p-6" data-feature="contextual">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl">
+                                        💬
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-900">Respostas Contextuais</h4>
+                                            <span class="inheritance-badge inheritance-global">Global</span>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mt-1">Entende contexto da conversa e responde de forma inteligente</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch active" onclick="toggleFeature(this)"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="tooltip-container">
+                                        <div class="cost-indicator">
+                                            <span class="cost-dot active"></span>
+                                            <span class="cost-dot"></span>
+                                            <span class="cost-dot"></span>
+                                            <span class="text-xs text-gray-500 ml-1">Baixo</span>
+                                        </div>
+                                        <div class="tooltip">~R$ 0,02 por mensagem</div>
+                                    </div>
+                                    <span class="text-xs text-gray-400">|</span>
+                                    <span class="text-xs text-gray-500">📊 2.847 usos (7d)</span>
+                                </div>
+                                <button class="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1" onclick="openDrawer('contextual')">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <!-- Accordion Config Preview -->
+                            <div class="accordion-content mt-4" id="accordion-contextual">
+                                <div class="bg-gray-50 rounded-xl p-4 space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Janela de contexto</span>
+                                        <span class="text-sm font-medium text-gray-900">50 mensagens</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Modo de resposta</span>
+                                        <span class="text-sm font-medium text-gray-900">Automático</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transcrição de Áudio -->
+                        <div class="feature-card enabled bg-white rounded-2xl p-6" data-feature="transcription">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center text-2xl">
+                                        🎤
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-900">Transcrição de Áudio</h4>
+                                            <span class="inheritance-badge inheritance-override">Override</span>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mt-1">Converte mensagens de voz em texto automaticamente</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch active" onclick="toggleFeature(this)"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="tooltip-container">
+                                        <div class="cost-indicator">
+                                            <span class="cost-dot active"></span>
+                                            <span class="cost-dot active high"></span>
+                                            <span class="cost-dot"></span>
+                                            <span class="text-xs text-gray-500 ml-1">Médio</span>
+                                        </div>
+                                        <div class="tooltip">~R$ 0,006 por segundo de áudio</div>
+                                    </div>
+                                    <span class="text-xs text-gray-400">|</span>
+                                    <span class="text-xs text-gray-500">🎤 142 min (7d)</span>
+                                </div>
+                                <button class="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1" onclick="openDrawer('transcription')">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Análise de Documentos -->
+                        <div class="feature-card enabled bg-white rounded-2xl p-6" data-feature="documents">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-2xl">
+                                        📄
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-900">Análise de Documentos</h4>
+                                            <span class="inheritance-badge inheritance-global">Global</span>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mt-1">Lê e interpreta PDFs, imagens e documentos</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch active" onclick="toggleFeature(this)"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="tooltip-container">
+                                        <div class="cost-indicator">
+                                            <span class="cost-dot active"></span>
+                                            <span class="cost-dot active high"></span>
+                                            <span class="cost-dot"></span>
+                                            <span class="text-xs text-gray-500 ml-1">Médio</span>
+                                        </div>
+                                        <div class="tooltip">~R$ 0,05 por página/imagem</div>
+                                    </div>
+                                    <span class="text-xs text-gray-400">|</span>
+                                    <span class="text-xs text-gray-500">📑 89 docs (7d)</span>
+                                </div>
+                                <button class="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1" onclick="openDrawer('documents')">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Reactions -->
+                        <div class="feature-card enabled bg-white rounded-2xl p-6" data-feature="reactions">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-yellow-100 rounded-xl flex items-center justify-center text-2xl">
+                                        😊
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-900">Reactions</h4>
+                                            <span class="inheritance-badge inheritance-global">Global</span>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mt-1">Reage com emojis contextualmente às mensagens</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch active" onclick="toggleFeature(this)"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="tooltip-container">
+                                        <div class="cost-indicator">
+                                            <span class="cost-dot active"></span>
+                                            <span class="cost-dot"></span>
+                                            <span class="cost-dot"></span>
+                                            <span class="text-xs text-gray-500 ml-1">Baixo</span>
+                                        </div>
+                                        <div class="tooltip">Incluso no processamento de mensagem</div>
+                                    </div>
+                                    <span class="text-xs text-gray-400">|</span>
+                                    <span class="text-xs text-gray-500">👍 1.2k reações (7d)</span>
+                                </div>
+                                <button class="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1" onclick="openDrawer('reactions')">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Avançada -->
+                <div class="mb-8" data-category="ai">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl">🧠</span>
+                        <h3 class="text-lg font-semibold text-gray-900">AI Avançada</h3>
+                        <span class="text-sm text-gray-500">Capacidades de inteligência artificial</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <!-- Pesquisa Web -->
+                        <div class="feature-card enabled bg-white rounded-2xl p-6" data-feature="websearch">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center text-2xl">
+                                        🌐
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-900">Pesquisa Web</h4>
+                                            <span class="inheritance-badge inheritance-global">Global</span>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mt-1">Busca informações atualizadas na internet em tempo real</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch active" onclick="toggleFeature(this)"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="tooltip-container">
+                                        <div class="cost-indicator">
+                                            <span class="cost-dot active"></span>
+                                            <span class="cost-dot active high"></span>
+                                            <span class="cost-dot"></span>
+                                            <span class="text-xs text-gray-500 ml-1">Médio</span>
+                                        </div>
+                                        <div class="tooltip">~R$ 0,01 por pesquisa</div>
+                                    </div>
+                                    <span class="text-xs text-gray-400">|</span>
+                                    <span class="text-xs text-gray-500">🔍 234 pesquisas (7d)</span>
+                                </div>
+                                <button class="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1" onclick="openDrawer('websearch')">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Geração de Imagens -->
+                        <div class="feature-card bg-white rounded-2xl p-6" data-feature="imagegen">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-pink-100 rounded-xl flex items-center justify-center text-2xl">
+                                        🎨
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-900">Geração de Imagens</h4>
+                                            <span class="inheritance-badge inheritance-global">Global</span>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mt-1">Cria imagens a partir de descrições textuais</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch" onclick="toggleFeature(this)"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="tooltip-container">
+                                        <div class="cost-indicator">
+                                            <span class="cost-dot active"></span>
+                                            <span class="cost-dot active high"></span>
+                                            <span class="cost-dot active very-high"></span>
+                                            <span class="text-xs text-gray-500 ml-1">Alto</span>
+                                        </div>
+                                        <div class="tooltip">~R$ 0,20 por imagem gerada</div>
+                                    </div>
+                                    <span class="text-xs text-gray-400">|</span>
+                                    <span class="text-xs text-gray-500">🖼️ Desativado</span>
+                                </div>
+                                <button class="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1" onclick="openDrawer('imagegen')">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Especialistas -->
+                        <div class="feature-card enabled bg-white rounded-2xl p-6" data-feature="specialists">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center text-2xl">
+                                        👨‍💻
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-900">Especialistas</h4>
+                                            <span class="inheritance-badge inheritance-override">Override</span>
+                                            <div class="tooltip-container">
+                                                <span class="text-gray-400 cursor-help text-sm">ⓘ</span>
+                                                <div class="tooltip">Modos especializados: /code, /legal, /finance, etc.</div>
+                                            </div>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mt-1">Comandos para ativar modos especializados de resposta</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch active" onclick="toggleFeature(this)"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="tooltip-container">
+                                        <div class="cost-indicator">
+                                            <span class="cost-dot active"></span>
+                                            <span class="cost-dot active high"></span>
+                                            <span class="cost-dot active very-high"></span>
+                                            <span class="text-xs text-gray-500 ml-1">Alto</span>
+                                        </div>
+                                        <div class="tooltip">~R$ 0,15 por uso (modelo avançado)</div>
+                                    </div>
+                                    <span class="text-xs text-gray-400">|</span>
+                                    <span class="text-xs text-gray-500">⚡ 67 usos (7d)</span>
+                                </div>
+                                <button class="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1" onclick="openDrawer('specialists')">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <!-- Specialists Quick View -->
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">/code</span>
+                                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs">/finance</span>
+                                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">/legal</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs">+3</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Memória Persistente -->
+                        <div class="feature-card enabled bg-white rounded-2xl p-6" data-feature="memory">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-cyan-100 rounded-xl flex items-center justify-center text-2xl">
+                                        🧠
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-900">Memória Persistente</h4>
+                                            <span class="inheritance-badge inheritance-global">Global</span>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mt-1">Lembra informações importantes entre conversas</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch active" onclick="toggleFeature(this)"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="tooltip-container">
+                                        <div class="cost-indicator">
+                                            <span class="cost-dot active"></span>
+                                            <span class="cost-dot"></span>
+                                            <span class="cost-dot"></span>
+                                            <span class="text-xs text-gray-500 ml-1">Baixo</span>
+                                        </div>
+                                        <div class="tooltip">~R$ 0,001 por interação (storage)</div>
+                                    </div>
+                                    <span class="text-xs text-gray-400">|</span>
+                                    <span class="text-xs text-gray-500">💾 847 memórias salvas</span>
+                                </div>
+                                <button class="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1" onclick="openDrawer('memory')">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integrações -->
+                <div class="mb-8" data-category="integrations">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl">🔌</span>
+                        <h3 class="text-lg font-semibold text-gray-900">Integrações</h3>
+                        <span class="text-sm text-gray-500">Conexões com serviços externos</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <!-- Calendar Integration -->
+                        <div class="feature-card bg-white rounded-2xl p-6 relative overflow-hidden" data-feature="calendar">
+                            <div class="coming-soon absolute top-4 right-4">Em breve</div>
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center text-2xl opacity-60">
+                                        📅
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-400">Google Calendar</h4>
+                                        </div>
+                                        <p class="text-sm text-gray-400 mt-1">Agenda reuniões e verifica disponibilidade</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch opacity-50 cursor-not-allowed"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <span class="text-xs text-gray-400">Disponível no plano Enterprise</span>
+                                </div>
+                                <button class="text-sm text-gray-400 cursor-not-allowed flex items-center gap-1">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CRM Integration -->
+                        <div class="feature-card bg-white rounded-2xl p-6 relative overflow-hidden" data-feature="crm">
+                            <div class="coming-soon absolute top-4 right-4">Em breve</div>
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center text-2xl opacity-60">
+                                        💼
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-400">CRM Integration</h4>
+                                        </div>
+                                        <p class="text-sm text-gray-400 mt-1">Conecta com Salesforce, HubSpot, Pipedrive</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch opacity-50 cursor-not-allowed"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <span class="text-xs text-gray-400">Disponível no plano Enterprise</span>
+                                </div>
+                                <button class="text-sm text-gray-400 cursor-not-allowed flex items-center gap-1">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Notion Integration -->
+                        <div class="feature-card bg-white rounded-2xl p-6 relative overflow-hidden" data-feature="notion">
+                            <div class="coming-soon absolute top-4 right-4">Em breve</div>
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center text-2xl opacity-60">
+                                        📝
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-400">Notion</h4>
+                                        </div>
+                                        <p class="text-sm text-gray-400 mt-1">Busca em bases de conhecimento e docs</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch opacity-50 cursor-not-allowed"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <span class="text-xs text-gray-400">Disponível no plano Business</span>
+                                </div>
+                                <button class="text-sm text-gray-400 cursor-not-allowed flex items-center gap-1">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Slack Integration -->
+                        <div class="feature-card bg-white rounded-2xl p-6 relative overflow-hidden" data-feature="slack">
+                            <div class="coming-soon absolute top-4 right-4">Em breve</div>
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-2xl opacity-60">
+                                        💬
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-400">Slack</h4>
+                                        </div>
+                                        <p class="text-sm text-gray-400 mt-1">Responde em canais do Slack</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch opacity-50 cursor-not-allowed"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <span class="text-xs text-gray-400">Disponível no plano Business</span>
+                                </div>
+                                <button class="text-sm text-gray-400 cursor-not-allowed flex items-center gap-1">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avançado -->
+                <div class="mb-8" data-category="advanced">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl">⚡</span>
+                        <h3 class="text-lg font-semibold text-gray-900">Avançado</h3>
+                        <span class="text-sm text-gray-500">Funcionalidades experimentais e avançadas</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <!-- Proatividade -->
+                        <div class="feature-card bg-white rounded-2xl p-6" data-feature="proactive">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center text-2xl relative">
+                                        🚀
+                                        <span class="absolute -top-1 -right-1 w-3 h-3 bg-indigo-500 rounded-full pulse-indicator"></span>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-900">Proatividade</h4>
+                                            <span class="inheritance-badge inheritance-global">Global</span>
+                                            <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs font-medium">Beta</span>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mt-1">Bot inicia conversas e envia lembretes proativamente</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch" onclick="toggleFeature(this)"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="tooltip-container">
+                                        <div class="cost-indicator">
+                                            <span class="cost-dot active"></span>
+                                            <span class="cost-dot"></span>
+                                            <span class="cost-dot"></span>
+                                            <span class="text-xs text-gray-500 ml-1">Baixo</span>
+                                        </div>
+                                        <div class="tooltip">Custo baseado em mensagens iniciadas</div>
+                                    </div>
+                                    <span class="text-xs text-gray-400">|</span>
+                                    <span class="text-xs text-gray-500">🔕 Desativado</span>
+                                </div>
+                                <button class="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1" onclick="openDrawer('proactive')">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Function Calling -->
+                        <div class="feature-card bg-white rounded-2xl p-6 relative overflow-hidden" data-feature="functions">
+                            <div class="coming-soon absolute top-4 right-4">Em breve</div>
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl opacity-60">
+                                        🔧
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-400">Function Calling</h4>
+                                        </div>
+                                        <p class="text-sm text-gray-400 mt-1">Execute ações personalizadas via API</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch opacity-50 cursor-not-allowed"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <span class="text-xs text-gray-400">Disponível no plano Enterprise</span>
+                                </div>
+                                <button class="text-sm text-gray-400 cursor-not-allowed flex items-center gap-1">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Autonomous Actions -->
+                        <div class="feature-card bg-white rounded-2xl p-6 relative overflow-hidden" data-feature="autonomous">
+                            <div class="coming-soon absolute top-4 right-4">Em breve</div>
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-violet-100 rounded-xl flex items-center justify-center text-2xl opacity-60">
+                                        🤖
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-400">Ações Autônomas</h4>
+                                        </div>
+                                        <p class="text-sm text-gray-400 mt-1">Bot executa tarefas complexas de forma autônoma</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch opacity-50 cursor-not-allowed"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <span class="text-xs text-gray-400">Disponível no plano Enterprise</span>
+                                </div>
+                                <button class="text-sm text-gray-400 cursor-not-allowed flex items-center gap-1">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Multi-Agent -->
+                        <div class="feature-card bg-white rounded-2xl p-6 relative overflow-hidden" data-feature="multiagent">
+                            <div class="coming-soon absolute top-4 right-4">Em breve</div>
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-teal-100 rounded-xl flex items-center justify-center text-2xl opacity-60">
+                                        👥
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-semibold text-gray-400">Multi-Agent</h4>
+                                        </div>
+                                        <p class="text-sm text-gray-400 mt-1">Múltiplos agentes colaborando em tarefas</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-switch opacity-50 cursor-not-allowed"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <span class="text-xs text-gray-400">Disponível no plano Enterprise</span>
+                                </div>
+                                <button class="text-sm text-gray-400 cursor-not-allowed flex items-center gap-1">
+                                    Configurar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cost Summary -->
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-1">Resumo de Custos</h3>
+                            <p class="text-indigo-100 text-sm">Baseado nas funcionalidades ativas e uso médio</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-3xl font-bold">~R$ 847</p>
+                            <p class="text-indigo-100 text-sm">estimado este mês</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-4 mt-6">
+                        <div class="bg-white/10 rounded-xl p-4">
+                            <p class="text-indigo-100 text-xs mb-1">Core Features</p>
+                            <p class="text-xl font-semibold">R$ 320</p>
+                        </div>
+                        <div class="bg-white/10 rounded-xl p-4">
+                            <p class="text-indigo-100 text-xs mb-1">AI Avançada</p>
+                            <p class="text-xl font-semibold">R$ 412</p>
+                        </div>
+                        <div class="bg-white/10 rounded-xl p-4">
+                            <p class="text-indigo-100 text-xs mb-1">Transcrições</p>
+                            <p class="text-xl font-semibold">R$ 89</p>
+                        </div>
+                        <div class="bg-white/10 rounded-xl p-4">
+                            <p class="text-indigo-100 text-xs mb-1">Docs/Imagens</p>
+                            <p class="text-xl font-semibold">R$ 26</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Configuration Drawer -->
+    <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+    <div class="drawer" id="config-drawer">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900" id="drawer-title">Configuração</h3>
+                <p class="text-sm text-gray-500" id="drawer-subtitle">Ajuste as opções desta funcionalidade</p>
+            </div>
+            <button onclick="closeDrawer()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Drawer Content (Dynamic) -->
+        <div class="p-6" id="drawer-content">
+            <!-- Transcription Config -->
+            <div class="drawer-section hidden" data-drawer="transcription">
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Idiomas Suportados</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" checked class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm text-gray-900">🇧🇷 Português</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" checked class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm text-gray-900">🇺🇸 English</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm text-gray-900">🇪🇸 Español</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Duração Máxima</label>
+                    <select class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm">
+                        <option>30 segundos</option>
+                        <option>1 minuto</option>
+                        <option selected>5 minutos</option>
+                        <option>10 minutos</option>
+                        <option>Sem limite</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Modelo</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="border-2 border-indigo-500 rounded-xl p-4 cursor-pointer bg-indigo-50">
+                            <p class="font-medium text-gray-900">Whisper Large</p>
+                            <p class="text-xs text-gray-500">Alta precisão</p>
+                        </div>
+                        <div class="border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-indigo-300">
+                            <p class="font-medium text-gray-900">Whisper Turbo</p>
+                            <p class="text-xs text-gray-500">Mais rápido, 30% cheaper</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-sm font-medium text-gray-700">Resposta Automática</label>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <p class="text-xs text-gray-500">Bot responde automaticamente ao conteúdo transcrito</p>
+                </div>
+                
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <span class="text-amber-500">⚠️</span>
+                        <div>
+                            <p class="text-sm font-medium text-amber-800">Custo por minuto</p>
+                            <p class="text-xs text-amber-600">Transcrição custa ~R$ 0,006/segundo. Considere definir um limite máximo.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Specialists Config -->
+            <div class="drawer-section hidden" data-drawer="specialists">
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Especialistas Ativos</label>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">💻</span>
+                                <div>
+                                    <p class="font-medium text-gray-900">/code</p>
+                                    <p class="text-xs text-gray-500">Programação e debugging</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch active" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
+                        </label>
+                        <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">📊</span>
+                                <div>
+                                    <p class="font-medium text-gray-900">/finance</p>
+                                    <p class="text-xs text-gray-500">Análise financeira e mercado</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch active" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
+                        </label>
+                        <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">⚖️</span>
+                                <div>
+                                    <p class="font-medium text-gray-900">/legal</p>
+                                    <p class="text-xs text-gray-500">Questões jurídicas e compliance</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch active" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
+                        </label>
+                        <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">📝</span>
+                                <div>
+                                    <p class="font-medium text-gray-900">/write</p>
+                                    <p class="text-xs text-gray-500">Redação e copywriting</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
+                        </label>
+                        <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">🔬</span>
+                                <div>
+                                    <p class="font-medium text-gray-900">/research</p>
+                                    <p class="text-xs text-gray-500">Pesquisa aprofundada</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
+                        </label>
+                        <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">🧮</span>
+                                <div>
+                                    <p class="font-medium text-gray-900">/math</p>
+                                    <p class="text-xs text-gray-500">Cálculos e análise numérica</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Modelo para Especialistas</label>
+                    <select class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm">
+                        <option>Claude 3 Sonnet (balanceado)</option>
+                        <option selected>Claude 3.5 Sonnet (recomendado)</option>
+                        <option>Claude 3 Opus (máxima qualidade)</option>
+                        <option>GPT-4 Turbo</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-2">Modelos mais avançados têm custo maior por token</p>
+                </div>
+            </div>
+
+            <!-- Memory Config -->
+            <div class="drawer-section hidden" data-drawer="memory">
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Tipo de Memória</label>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 p-4 border-2 border-indigo-500 rounded-xl cursor-pointer bg-indigo-50">
+                            <input type="radio" name="memory-type" checked class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="font-medium text-gray-900">Por Grupo</p>
+                                <p class="text-xs text-gray-500">Cada grupo tem memória separada</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-indigo-300">
+                            <input type="radio" name="memory-type" class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="font-medium text-gray-900">Por Usuário</p>
+                                <p class="text-xs text-gray-500">Cada pessoa tem memória individual</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-indigo-300">
+                            <input type="radio" name="memory-type" class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="font-medium text-gray-900">Global</p>
+                                <p class="text-xs text-gray-500">Memória compartilhada entre todos</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-sm font-medium text-gray-700">Limite de Memórias</label>
+                        <span class="text-sm text-indigo-600">500</span>
+                    </div>
+                    <input type="range" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value="50" min="10" max="100">
+                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                        <span>100</span>
+                        <span>1000</span>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Retenção</label>
+                    <select class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm">
+                        <option>7 dias</option>
+                        <option>30 dias</option>
+                        <option selected>90 dias</option>
+                        <option>1 ano</option>
+                        <option>Indefinido</option>
+                    </select>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="text-sm font-medium text-gray-900 mb-3">Memórias Atuais</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Total armazenado</span>
+                            <span class="font-medium text-gray-900">847 memórias</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Espaço usado</span>
+                            <span class="font-medium text-gray-900">2.3 MB</span>
+                        </div>
+                    </div>
+                    <button class="w-full mt-4 py-2 border border-red-200 text-red-600 rounded-lg text-sm hover:bg-red-50">
+                        🗑️ Limpar Memórias
+                    </button>
+                </div>
+            </div>
+
+            <!-- Proactive Config -->
+            <div class="drawer-section hidden" data-drawer="proactive">
+                <div class="mb-6 bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <span class="text-indigo-500">💡</span>
+                        <div>
+                            <p class="text-sm font-medium text-indigo-800">Funcionalidade Beta</p>
+                            <p class="text-xs text-indigo-600">A proatividade permite que o bot inicie conversas quando detecta oportunidades relevantes.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Triggers de Proatividade</label>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">📅</span>
+                                <div>
+                                    <p class="font-medium text-gray-900">Lembretes de Agenda</p>
+                                    <p class="text-xs text-gray-500">Avisa sobre eventos próximos</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
+                        </label>
+                        <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">📰</span>
+                                <div>
+                                    <p class="font-medium text-gray-900">News Relevantes</p>
+                                    <p class="text-xs text-gray-500">Compartilha notícias do setor</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
+                        </label>
+                        <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">💬</span>
+                                <div>
+                                    <p class="font-medium text-gray-900">Follow-up de Conversas</p>
+                                    <p class="text-xs text-gray-500">Retoma discussões pendentes</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
+                        </label>
+                        <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">🎂</span>
+                                <div>
+                                    <p class="font-medium text-gray-900">Datas Importantes</p>
+                                    <p class="text-xs text-gray-500">Aniversários, marcos, etc.</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Frequência Máxima</label>
+                    <select class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm">
+                        <option>1x por dia</option>
+                        <option selected>2x por dia</option>
+                        <option>3x por dia</option>
+                        <option>Sem limite</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-2">Evita que o bot seja intrusivo demais</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Horário Permitido</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs text-gray-500 mb-1 block">Início</label>
+                            <input type="time" value="09:00" class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 mb-1 block">Fim</label>
+                            <input type="time" value="18:00" class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reactions Config -->
+            <div class="drawer-section hidden" data-drawer="reactions">
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Frequência de Reações</label>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-600">Probabilidade</span>
+                        <span class="text-sm text-indigo-600">30%</span>
+                    </div>
+                    <input type="range" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value="30">
+                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                        <span>Raro (10%)</span>
+                        <span>Frequente (80%)</span>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Emojis Favoritos</label>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg text-xl cursor-pointer hover:bg-indigo-100 border-2 border-indigo-500">👍</span>
+                        <span class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg text-xl cursor-pointer hover:bg-indigo-100 border-2 border-indigo-500">❤️</span>
+                        <span class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg text-xl cursor-pointer hover:bg-indigo-100 border-2 border-indigo-500">😂</span>
+                        <span class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg text-xl cursor-pointer hover:bg-indigo-100">🔥</span>
+                        <span class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg text-xl cursor-pointer hover:bg-indigo-100">💯</span>
+                        <span class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg text-xl cursor-pointer hover:bg-indigo-100">🎉</span>
+                        <span class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg text-xl cursor-pointer hover:bg-indigo-100">🤔</span>
+                        <span class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg text-xl cursor-pointer hover:bg-indigo-100">👀</span>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-sm font-medium text-gray-700">Reações Contextuais</label>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <p class="text-xs text-gray-500">Bot escolhe emoji baseado no conteúdo da mensagem</p>
+                </div>
+            </div>
+
+            <!-- Documents Config -->
+            <div class="drawer-section hidden" data-drawer="documents">
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Formatos Suportados</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="flex items-center justify-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" checked class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm">PDF</span>
+                        </label>
+                        <label class="flex items-center justify-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" checked class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm">Imagens</span>
+                        </label>
+                        <label class="flex items-center justify-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" checked class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm">DOCX</span>
+                        </label>
+                        <label class="flex items-center justify-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm">XLSX</span>
+                        </label>
+                        <label class="flex items-center justify-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm">PPTX</span>
+                        </label>
+                        <label class="flex items-center justify-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm">TXT</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Tamanho Máximo</label>
+                    <select class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm">
+                        <option>5 MB</option>
+                        <option selected>10 MB</option>
+                        <option>25 MB</option>
+                        <option>50 MB</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-sm font-medium text-gray-700">OCR Avançado</label>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <p class="text-xs text-gray-500">Extrai texto de imagens e PDFs escaneados</p>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-sm font-medium text-gray-700">Resumo Automático</label>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <p class="text-xs text-gray-500">Gera resumo do documento junto com a análise</p>
+                </div>
+            </div>
+
+            <!-- Web Search Config -->
+            <div class="drawer-section hidden" data-drawer="websearch">
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Modo de Pesquisa</label>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 p-4 border-2 border-indigo-500 rounded-xl cursor-pointer bg-indigo-50">
+                            <input type="radio" name="search-mode" checked class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="font-medium text-gray-900">Automático</p>
+                                <p class="text-xs text-gray-500">Bot decide quando pesquisar</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-indigo-300">
+                            <input type="radio" name="search-mode" class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="font-medium text-gray-900">Sob Demanda</p>
+                                <p class="text-xs text-gray-500">Apenas com comando /search</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Provedor de Busca</label>
+                    <select class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm">
+                        <option selected>Brave Search (recomendado)</option>
+                        <option>Google Search</option>
+                        <option>DuckDuckGo</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Resultados por Pesquisa</label>
+                    <select class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm">
+                        <option>3 resultados</option>
+                        <option selected>5 resultados</option>
+                        <option>10 resultados</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-sm font-medium text-gray-700">Citar Fontes</label>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <p class="text-xs text-gray-500">Inclui links das fontes nas respostas</p>
+                </div>
+            </div>
+
+            <!-- Image Gen Config -->
+            <div class="drawer-section hidden" data-drawer="imagegen">
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Modelo de Geração</label>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 p-4 border-2 border-indigo-500 rounded-xl cursor-pointer bg-indigo-50">
+                            <input type="radio" name="image-model" checked class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="font-medium text-gray-900">DALL-E 3</p>
+                                <p class="text-xs text-gray-500">Máxima qualidade • ~R$ 0,20/imagem</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-indigo-300">
+                            <input type="radio" name="image-model" class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="font-medium text-gray-900">Stable Diffusion XL</p>
+                                <p class="text-xs text-gray-500">Boa qualidade • ~R$ 0,05/imagem</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Resolução Padrão</label>
+                    <select class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm">
+                        <option>512x512</option>
+                        <option selected>1024x1024</option>
+                        <option>1792x1024 (wide)</option>
+                        <option>1024x1792 (tall)</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Limite Diário</label>
+                    <select class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm">
+                        <option>5 imagens</option>
+                        <option selected>10 imagens</option>
+                        <option>25 imagens</option>
+                        <option>Sem limite</option>
+                    </select>
+                </div>
+                
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <span class="text-amber-500">💰</span>
+                        <div>
+                            <p class="text-sm font-medium text-amber-800">Custo elevado</p>
+                            <p class="text-xs text-amber-600">Geração de imagens tem o maior custo por uso. Considere definir limites.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contextual Config -->
+            <div class="drawer-section hidden" data-drawer="contextual">
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-sm font-medium text-gray-700">Janela de Contexto</label>
+                        <span class="text-sm text-indigo-600">50 mensagens</span>
+                    </div>
+                    <input type="range" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value="50" min="10" max="100">
+                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                        <span>10 msgs</span>
+                        <span>100 msgs</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Quantas mensagens anteriores o bot considera ao responder</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-sm font-medium text-gray-700 mb-3 block">Modo de Resposta</label>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 p-4 border-2 border-indigo-500 rounded-xl cursor-pointer bg-indigo-50">
+                            <input type="radio" name="response-mode" checked class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="font-medium text-gray-900">Automático</p>
+                                <p class="text-xs text-gray-500">Responde quando relevante</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-indigo-300">
+                            <input type="radio" name="response-mode" class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="font-medium text-gray-900">Sempre</p>
+                                <p class="text-xs text-gray-500">Responde a todas as mensagens</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-indigo-300">
+                            <input type="radio" name="response-mode" class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="font-medium text-gray-900">Apenas Menções</p>
+                                <p class="text-xs text-gray-500">Só quando @mencionado</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-sm font-medium text-gray-700">Incluir Metadados</label>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <p class="text-xs text-gray-500">Considera quem enviou, horário, etc.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Drawer Footer -->
+        <div class="p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0">
+            <div class="flex items-center justify-between">
+                <button onclick="closeDrawer()" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-100">
+                    Cancelar
+                </button>
+                <button class="px-6 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">
+                    💾 Salvar Configurações
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle feature on/off
+        function toggleFeature(element) {
+            element.classList.toggle('active');
+            const card = element.closest('.feature-card');
+            if (element.classList.contains('active')) {
+                card.classList.add('enabled');
+            } else {
+                card.classList.remove('enabled');
+            }
+        }
+
+        // Show category
+        function showCategory(category, button) {
+            // Update tabs
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            button.classList.add('active');
+
+            // Show/hide categories
+            document.querySelectorAll('[data-category]').forEach(section => {
+                if (category === 'all' || section.dataset.category === category) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+        }
+
+        // Open configuration drawer
+        function openDrawer(feature) {
+            document.getElementById('drawer-overlay').classList.add('open');
+            document.getElementById('config-drawer').classList.add('open');
+            
+            // Hide all drawer sections
+            document.querySelectorAll('.drawer-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show requested section
+            const section = document.querySelector(`[data-drawer="${feature}"]`);
+            if (section) {
+                section.classList.remove('hidden');
+            }
+
+            // Update drawer title
+            const titles = {
+                'transcription': { title: 'Transcrição de Áudio', subtitle: 'Configurações de conversão voz para texto' },
+                'specialists': { title: 'Especialistas', subtitle: 'Gerencie os modos especializados' },
+                'memory': { title: 'Memória Persistente', subtitle: 'Configure como o bot lembra informações' },
+                'proactive': { title: 'Proatividade', subtitle: 'Ajuste quando o bot inicia conversas' },
+                'reactions': { title: 'Reactions', subtitle: 'Configure reações com emojis' },
+                'documents': { title: 'Análise de Documentos', subtitle: 'Formatos e processamento de arquivos' },
+                'websearch': { title: 'Pesquisa Web', subtitle: 'Configure busca na internet' },
+                'imagegen': { title: 'Geração de Imagens', subtitle: 'Modelos e limites de criação' },
+                'contextual': { title: 'Respostas Contextuais', subtitle: 'Ajuste a janela de contexto' }
+            };
+            
+            if (titles[feature]) {
+                document.getElementById('drawer-title').textContent = titles[feature].title;
+                document.getElementById('drawer-subtitle').textContent = titles[feature].subtitle;
+            }
+        }
+
+        // Close drawer
+        function closeDrawer() {
+            document.getElementById('drawer-overlay').classList.remove('open');
+            document.getElementById('config-drawer').classList.remove('open');
+        }
+
+        // Close drawer on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDrawer();
+            }
+        });
+
+        // Update inheritance badge when scope changes
+        document.getElementById('scope-selector').addEventListener('change', function(e) {
+            const isGlobal = e.target.value === 'global';
+            document.querySelectorAll('.inheritance-badge').forEach(badge => {
+                if (!isGlobal && Math.random() > 0.6) {
+                    badge.classList.remove('inheritance-global');
+                    badge.classList.add('inheritance-override');
+                    badge.textContent = 'Override';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

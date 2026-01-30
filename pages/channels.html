@@ -1,0 +1,3521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupos & Canais | BaaS Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a24;
+            --bg-elevated: #22222e;
+            --bg-hover: #2a2a38;
+            
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-default: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-tertiary: #6b6b7a;
+            --text-muted: #4a4a58;
+            
+            --accent-primary: #6366f1;
+            --accent-primary-hover: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.1);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.1);
+            --error: #ef4444;
+            --error-bg: rgba(239, 68, 68, 0.1);
+            --info: #3b82f6;
+            --info-bg: rgba(59, 130, 246, 0.1);
+            
+            --whatsapp: #25D366;
+            --telegram: #0088cc;
+            --discord: #5865F2;
+            --slack: #4A154B;
+            
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 20px;
+            
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 40px var(--accent-glow);
+            
+            --transition-fast: 150ms ease;
+            --transition-normal: 250ms ease;
+            --transition-slow: 400ms ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Layout */
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-subtle);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 12px;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-primary), #a855f7);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.1));
+            color: var(--text-primary);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 20px;
+            background: var(--accent-primary);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--accent-primary);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .user-card:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 32px;
+            max-width: calc(100vw - 260px);
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .page-title-section h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-title-section h1 i {
+            color: var(--accent-primary);
+        }
+
+        .page-title-section p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), #818cf8);
+            color: white;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-default);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-elevated);
+            border-color: var(--border-hover);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .btn-ghost:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: var(--error-bg);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            justify-content: center;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--stat-color, var(--accent-primary)), transparent);
+            opacity: 0.5;
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--error);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 10px 16px 10px 42px;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .search-shortcut {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--bg-tertiary);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* Autocomplete */
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            margin-top: 4px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-section {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .autocomplete-section:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 16px 8px;
+        }
+
+        .autocomplete-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .autocomplete-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .autocomplete-item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .autocomplete-item-text {
+            flex: 1;
+        }
+
+        .autocomplete-item-title {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .autocomplete-item-subtitle {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        /* Filters */
+        .filters-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-dropdown {
+            position: relative;
+        }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .filter-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 200px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            margin-top: 4px;
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            display: none;
+            padding: 8px 0;
+        }
+
+        .filter-menu.show {
+            display: block;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .filter-option:hover {
+            background: var(--bg-hover);
+        }
+
+        .filter-option.selected {
+            color: var(--accent-primary);
+        }
+
+        .filter-option i {
+            width: 16px;
+            text-align: center;
+        }
+
+        .filter-check {
+            margin-left: auto;
+            opacity: 0;
+        }
+
+        .filter-option.selected .filter-check {
+            opacity: 1;
+        }
+
+        /* View Toggle */
+        .view-toggle {
+            display: flex;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 3px;
+            margin-left: auto;
+        }
+
+        .view-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 30px;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .view-toggle-btn:hover {
+            color: var(--text-secondary);
+        }
+
+        .view-toggle-btn.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* Bulk Actions */
+        .bulk-actions {
+            display: none;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.05));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+        }
+
+        .bulk-actions.show {
+            display: flex;
+        }
+
+        .bulk-count {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--accent-primary);
+        }
+
+        .bulk-separator {
+            width: 1px;
+            height: 24px;
+            background: var(--border-default);
+        }
+
+        .bulk-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Groups Grid/List */
+        .groups-container {
+            position: relative;
+        }
+
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .groups-list {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .groups-container.list-view .groups-grid {
+            display: none;
+        }
+
+        .groups-container.list-view .groups-list {
+            display: flex;
+        }
+
+        /* Group Card - Grid */
+        .group-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            transition: all var(--transition-normal);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .group-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .group-card.selected {
+            border-color: var(--accent-primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.02));
+        }
+
+        .group-card-checkbox {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            background: var(--bg-tertiary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all var(--transition-fast);
+        }
+
+        .group-card:hover .group-card-checkbox,
+        .group-card.selected .group-card-checkbox {
+            opacity: 1;
+        }
+
+        .group-card.selected .group-card-checkbox {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .group-card.selected .group-card-checkbox::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 10px;
+            color: white;
+        }
+
+        .group-card-header {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .group-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .group-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+        }
+
+        .channel-indicator {
+            position: absolute;
+            bottom: -4px;
+            right: -4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            border: 2px solid var(--bg-secondary);
+        }
+
+        .channel-indicator.whatsapp { background: var(--whatsapp); }
+        .channel-indicator.telegram { background: var(--telegram); }
+        .channel-indicator.discord { background: var(--discord); }
+        .channel-indicator.slack { background: var(--slack); }
+
+        .group-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .group-name {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .group-name span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .status-badge {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 3px 8px;
+            border-radius: 20px;
+            flex-shrink: 0;
+        }
+
+        .status-badge.active {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .status-badge.paused {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .status-badge.inactive {
+            background: var(--error-bg);
+            color: var(--error);
+        }
+
+        .group-meta {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .group-meta-separator {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .group-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 14px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        .group-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .tag {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .group-card:hover .quick-actions {
+            opacity: 1;
+        }
+
+        .quick-action {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .quick-action:hover {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border-color: var(--border-default);
+        }
+
+        .quick-action.pause:hover {
+            background: var(--warning-bg);
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .quick-action.delete:hover {
+            background: var(--error-bg);
+            color: var(--error);
+            border-color: var(--error);
+        }
+
+        /* Group Card - List View */
+        .group-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .group-row:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-tertiary);
+        }
+
+        .group-row.selected {
+            border-color: var(--accent-primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.02));
+        }
+
+        .group-row-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            background: var(--bg-tertiary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .group-row.selected .group-row-checkbox {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .group-row.selected .group-row-checkbox::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 10px;
+            color: white;
+        }
+
+        .group-row-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .group-row-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .group-row-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .group-row-meta {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .group-row-metrics {
+            display: flex;
+            gap: 24px;
+            flex-shrink: 0;
+        }
+
+        .group-row-metric {
+            text-align: center;
+        }
+
+        .group-row-metric-value {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .group-row-metric-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .group-row-actions {
+            display: flex;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .group-row:hover .group-row-actions {
+            opacity: 1;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px;
+            text-align: center;
+        }
+
+        .empty-state.show {
+            display: flex;
+        }
+
+        .empty-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .empty-icon i {
+            font-size: 48px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px dashed var(--border-subtle);
+        }
+
+        .empty-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            max-width: 360px;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* Add Group Modal */
+        .modal-wizard {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all var(--transition-normal);
+        }
+
+        .modal-overlay.show .modal-wizard {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .wizard-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .wizard-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .wizard-steps {
+            display: flex;
+            gap: 8px;
+        }
+
+        .wizard-step {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            background: var(--bg-tertiary);
+            transition: all var(--transition-fast);
+        }
+
+        .wizard-step.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.1));
+        }
+
+        .wizard-step.completed {
+            background: var(--success-bg);
+        }
+
+        .wizard-step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--bg-elevated);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .wizard-step.active .wizard-step-number {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .wizard-step.completed .wizard-step-number {
+            background: var(--success);
+            color: white;
+        }
+
+        .wizard-step.completed .wizard-step-number::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+        }
+
+        .wizard-step-text {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .wizard-step.active .wizard-step-text {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .wizard-step.completed .wizard-step-text {
+            color: var(--success);
+        }
+
+        .wizard-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .wizard-panel {
+            display: none;
+        }
+
+        .wizard-panel.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-helper {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .channel-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .channel-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .channel-option:hover {
+            border-color: var(--border-default);
+        }
+
+        .channel-option.selected {
+            border-color: var(--accent-primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.05));
+        }
+
+        .channel-option-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+
+        .channel-option-text {
+            flex: 1;
+        }
+
+        .channel-option-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .channel-option-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .workspace-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .workspace-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .workspace-option:hover {
+            border-color: var(--border-default);
+        }
+
+        .workspace-option.selected {
+            border-color: var(--accent-primary);
+        }
+
+        .workspace-option-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .workspace-option-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .workspace-option-check {
+            margin-left: auto;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--border-default);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .workspace-option.selected .workspace-option-check {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .workspace-option.selected .workspace-option-check::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 10px;
+            color: white;
+        }
+
+        .wizard-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Group Detail Modal */
+        .modal-detail {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all var(--transition-normal);
+        }
+
+        .modal-overlay.show .modal-detail {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 24px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .detail-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .detail-avatar .channel-indicator {
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+        }
+
+        .detail-info {
+            flex: 1;
+        }
+
+        .detail-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detail-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .detail-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .detail-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .detail-close:hover {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+        }
+
+        .detail-tabs {
+            display: flex;
+            gap: 4px;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .detail-tab {
+            padding: 14px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            position: relative;
+            transition: all var(--transition-fast);
+        }
+
+        .detail-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .detail-tab.active {
+            color: var(--accent-primary);
+        }
+
+        .detail-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent-primary);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .detail-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .detail-panel {
+            display: none;
+        }
+
+        .detail-panel.active {
+            display: block;
+        }
+
+        /* Overview Panel */
+        .overview-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .overview-stat {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .overview-stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .overview-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .overview-stat-change {
+            font-size: 12px;
+            color: var(--success);
+            margin-top: 4px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--accent-primary);
+        }
+
+        .activity-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 12px;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .activity-content {
+            flex: 1;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .activity-item:last-child .activity-content {
+            border-bottom: none;
+        }
+
+        .activity-text {
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Config Panel */
+        .config-section {
+            margin-bottom: 24px;
+        }
+
+        .config-card {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .config-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .config-row:last-child {
+            border-bottom: none;
+        }
+
+        .config-label {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .config-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            width: 44px;
+            height: 24px;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .toggle.active {
+            background: var(--accent-primary);
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform var(--transition-fast);
+        }
+
+        .toggle.active::after {
+            transform: translateX(20px);
+        }
+
+        /* History Panel */
+        .history-filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .history-table td {
+            padding: 14px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .history-table tr:hover td {
+            background: var(--bg-tertiary);
+        }
+
+        .event-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .event-type.message { background: var(--info-bg); color: var(--info); }
+        .event-type.command { background: var(--success-bg); color: var(--success); }
+        .event-type.error { background: var(--error-bg); color: var(--error); }
+        .event-type.config { background: var(--warning-bg); color: var(--warning); }
+
+        /* Memory Panel */
+        .memory-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .memory-card {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 20px;
+        }
+
+        .memory-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .memory-card-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .memory-card-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .memory-progress {
+            height: 4px;
+            background: var(--bg-elevated);
+            border-radius: 2px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .memory-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), #a855f7);
+            border-radius: 2px;
+            transition: width var(--transition-normal);
+        }
+
+        .context-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .context-item {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .context-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .context-item-key {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        .context-item-time {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .context-item-value {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 2000;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            transform: translateX(120%);
+            transition: transform var(--transition-normal);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success { border-left: 3px solid var(--success); }
+        .toast.error { border-left: 3px solid var(--error); }
+        .toast.warning { border-left: 3px solid var(--warning); }
+
+        .toast-icon {
+            font-size: 16px;
+        }
+
+        .toast.success .toast-icon { color: var(--success); }
+        .toast.error .toast-icon { color: var(--error); }
+        .toast.warning .toast-icon { color: var(--warning); }
+
+        .toast-message {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .overview-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                max-width: 100vw;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .groups-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-container {
+                max-width: none;
+            }
+            
+            .view-toggle {
+                margin-left: 0;
+            }
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: slideUp 0.3s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">B</div>
+                <span class="logo-text">BaaS</span>
+            </div>
+
+            <nav class="nav-section">
+                <div class="nav-section-title">Principal</div>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-comments"></i>
+                    <span>Grupos & Canais</span>
+                    <span class="nav-badge">12</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-robot"></i>
+                    <span>Agentes</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-brain"></i>
+                    <span>Memória</span>
+                </a>
+            </nav>
+
+            <nav class="nav-section">
+                <div class="nav-section-title">Configurações</div>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-plug"></i>
+                    <span>Integrações</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-key"></i>
+                    <span>API Keys</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-card">
+                    <div class="user-avatar">JD</div>
+                    <div class="user-info">
+                        <div class="user-name">João Dev</div>
+                        <div class="user-role">Admin</div>
+                    </div>
+                    <i class="fas fa-ellipsis-v" style="color: var(--text-muted);"></i>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-title-section">
+                    <h1><i class="fas fa-comments"></i> Grupos & Canais</h1>
+                    <p>Gerencie seus grupos e canais conectados em um só lugar</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="showDocs()">
+                        <i class="fas fa-book"></i>
+                        Docs
+                    </button>
+                    <button class="btn btn-primary" onclick="openAddModal()">
+                        <i class="fas fa-plus"></i>
+                        Adicionar Grupo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card" style="--stat-color: var(--accent-primary);">
+                    <div class="stat-header">
+                        <span class="stat-label">Total de Grupos</span>
+                        <div class="stat-icon" style="background: var(--accent-glow); color: var(--accent-primary);">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        +3 este mês
+                    </div>
+                </div>
+
+                <div class="stat-card" style="--stat-color: var(--success);">
+                    <div class="stat-header">
+                        <span class="stat-label">Grupos Ativos</span>
+                        <div class="stat-icon" style="background: var(--success-bg); color: var(--success);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">9</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        75% ativos
+                    </div>
+                </div>
+
+                <div class="stat-card" style="--stat-color: var(--info);">
+                    <div class="stat-header">
+                        <span class="stat-label">Mensagens Hoje</span>
+                        <div class="stat-icon" style="background: var(--info-bg); color: var(--info);">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">847</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        +12% vs ontem
+                    </div>
+                </div>
+
+                <div class="stat-card" style="--stat-color: #a855f7;">
+                    <div class="stat-header">
+                        <span class="stat-label">Comandos</span>
+                        <div class="stat-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
+                            <i class="fas fa-terminal"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">234</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        +28 hoje
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Buscar grupos..." oninput="handleSearch(this.value)" onfocus="showAutocomplete()" onblur="hideAutocomplete()">
+                    <span class="search-shortcut">⌘K</span>
+                    
+                    <div class="autocomplete-dropdown" id="autocompleteDropdown">
+                        <div class="autocomplete-section">
+                            <div class="autocomplete-section-title">Sugestões</div>
+                            <div class="autocomplete-item">
+                                <div class="autocomplete-item-icon" style="background: var(--whatsapp);">
+                                    <i class="fab fa-whatsapp"></i>
+                                </div>
+                                <div class="autocomplete-item-text">
+                                    <div class="autocomplete-item-title">Dev Team Brasil</div>
+                                    <div class="autocomplete-item-subtitle">WhatsApp • 156 membros</div>
+                                </div>
+                            </div>
+                            <div class="autocomplete-item">
+                                <div class="autocomplete-item-icon" style="background: var(--discord);">
+                                    <i class="fab fa-discord"></i>
+                                </div>
+                                <div class="autocomplete-item-text">
+                                    <div class="autocomplete-item-title">Suporte Premium</div>
+                                    <div class="autocomplete-item-subtitle">Discord • 89 membros</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="autocomplete-section">
+                            <div class="autocomplete-section-title">Filtros rápidos</div>
+                            <div class="autocomplete-item">
+                                <div class="autocomplete-item-icon" style="background: var(--success-bg); color: var(--success);">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="autocomplete-item-text">
+                                    <div class="autocomplete-item-title">status:active</div>
+                                    <div class="autocomplete-item-subtitle">Filtrar apenas grupos ativos</div>
+                                </div>
+                            </div>
+                            <div class="autocomplete-item">
+                                <div class="autocomplete-item-icon" style="background: var(--info-bg); color: var(--info);">
+                                    <i class="fas fa-hashtag"></i>
+                                </div>
+                                <div class="autocomplete-item-text">
+                                    <div class="autocomplete-item-title">channel:whatsapp</div>
+                                    <div class="autocomplete-item-subtitle">Filtrar por canal</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filters-group">
+                    <div class="filter-dropdown">
+                        <button class="filter-btn" onclick="toggleFilter('status')">
+                            <i class="fas fa-circle"></i>
+                            Status
+                            <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                        </button>
+                        <div class="filter-menu" id="filter-status">
+                            <div class="filter-option selected" onclick="selectFilter('status', 'all')">
+                                <i class="fas fa-layer-group"></i>
+                                <span>Todos</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                            <div class="filter-option" onclick="selectFilter('status', 'active')">
+                                <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                                <span>Ativos</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                            <div class="filter-option" onclick="selectFilter('status', 'paused')">
+                                <i class="fas fa-pause-circle" style="color: var(--warning);"></i>
+                                <span>Pausados</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                            <div class="filter-option" onclick="selectFilter('status', 'inactive')">
+                                <i class="fas fa-times-circle" style="color: var(--error);"></i>
+                                <span>Inativos</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-dropdown">
+                        <button class="filter-btn" onclick="toggleFilter('channel')">
+                            <i class="fas fa-plug"></i>
+                            Canal
+                            <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                        </button>
+                        <div class="filter-menu" id="filter-channel">
+                            <div class="filter-option selected" onclick="selectFilter('channel', 'all')">
+                                <i class="fas fa-globe"></i>
+                                <span>Todos</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                            <div class="filter-option" onclick="selectFilter('channel', 'whatsapp')">
+                                <i class="fab fa-whatsapp" style="color: var(--whatsapp);"></i>
+                                <span>WhatsApp</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                            <div class="filter-option" onclick="selectFilter('channel', 'telegram')">
+                                <i class="fab fa-telegram" style="color: var(--telegram);"></i>
+                                <span>Telegram</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                            <div class="filter-option" onclick="selectFilter('channel', 'discord')">
+                                <i class="fab fa-discord" style="color: var(--discord);"></i>
+                                <span>Discord</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                            <div class="filter-option" onclick="selectFilter('channel', 'slack')">
+                                <i class="fab fa-slack" style="color: var(--slack);"></i>
+                                <span>Slack</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-dropdown">
+                        <button class="filter-btn" onclick="toggleFilter('workspace')">
+                            <i class="fas fa-folder"></i>
+                            Workspace
+                            <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                        </button>
+                        <div class="filter-menu" id="filter-workspace">
+                            <div class="filter-option selected" onclick="selectFilter('workspace', 'all')">
+                                <i class="fas fa-globe"></i>
+                                <span>Todos</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                            <div class="filter-option" onclick="selectFilter('workspace', 'main')">
+                                <i class="fas fa-building"></i>
+                                <span>Principal</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                            <div class="filter-option" onclick="selectFilter('workspace', 'dev')">
+                                <i class="fas fa-code"></i>
+                                <span>Desenvolvimento</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                            <div class="filter-option" onclick="selectFilter('workspace', 'support')">
+                                <i class="fas fa-headset"></i>
+                                <span>Suporte</span>
+                                <i class="fas fa-check filter-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view-toggle">
+                    <div class="view-toggle-btn active" onclick="setView('grid')" title="Grid View">
+                        <i class="fas fa-th-large"></i>
+                    </div>
+                    <div class="view-toggle-btn" onclick="setView('list')" title="List View">
+                        <i class="fas fa-list"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="bulk-actions" id="bulkActions">
+                <span class="bulk-count"><span id="selectedCount">0</span> selecionados</span>
+                <div class="bulk-separator"></div>
+                <div class="bulk-btns">
+                    <button class="btn btn-secondary btn-sm" onclick="bulkPause()">
+                        <i class="fas fa-pause"></i>
+                        Pausar
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="bulkActivate()">
+                        <i class="fas fa-play"></i>
+                        Ativar
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="bulkDelete()">
+                        <i class="fas fa-trash"></i>
+                        Excluir
+                    </button>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="clearSelection()" style="margin-left: auto;">
+                    <i class="fas fa-times"></i>
+                    Limpar seleção
+                </button>
+            </div>
+
+            <!-- Groups Container -->
+            <div class="groups-container" id="groupsContainer">
+                <!-- Grid View -->
+                <div class="groups-grid" id="groupsGrid">
+                    <!-- Group Card 1 -->
+                    <div class="group-card animate-in" style="animation-delay: 0.05s;" onclick="openGroupDetail(1)">
+                        <div class="group-card-checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)"></div>
+                        <div class="group-card-header">
+                            <div class="group-avatar" style="background: linear-gradient(135deg, #25D366, #128C7E);">
+                                <span>🚀</span>
+                                <div class="channel-indicator whatsapp">
+                                    <i class="fab fa-whatsapp"></i>
+                                </div>
+                            </div>
+                            <div class="group-info">
+                                <div class="group-name">
+                                    <span>Dev Team Brasil</span>
+                                    <span class="status-badge active">Ativo</span>
+                                </div>
+                                <div class="group-meta">
+                                    <span>156 membros</span>
+                                    <span class="group-meta-separator"></span>
+                                    <span>Workspace Principal</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="group-metrics">
+                            <div class="metric">
+                                <div class="metric-value">2.4k</div>
+                                <div class="metric-label">Mensagens/mês</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">89</div>
+                                <div class="metric-label">Comandos</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">98%</div>
+                                <div class="metric-label">Uptime</div>
+                            </div>
+                        </div>
+                        <div class="group-tags">
+                            <span class="tag">Tech</span>
+                            <span class="tag">Brasil</span>
+                            <span class="tag">Premium</span>
+                        </div>
+                        <div class="quick-actions">
+                            <button class="quick-action" onclick="event.stopPropagation(); openConfig(1)">
+                                <i class="fas fa-cog"></i>
+                                Config
+                            </button>
+                            <button class="quick-action pause" onclick="event.stopPropagation(); pauseGroup(1)">
+                                <i class="fas fa-pause"></i>
+                                Pausar
+                            </button>
+                            <button class="quick-action delete" onclick="event.stopPropagation(); deleteGroup(1)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Group Card 2 -->
+                    <div class="group-card animate-in" style="animation-delay: 0.1s;" onclick="openGroupDetail(2)">
+                        <div class="group-card-checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)"></div>
+                        <div class="group-card-header">
+                            <div class="group-avatar" style="background: linear-gradient(135deg, #5865F2, #7289DA);">
+                                <span>💬</span>
+                                <div class="channel-indicator discord">
+                                    <i class="fab fa-discord"></i>
+                                </div>
+                            </div>
+                            <div class="group-info">
+                                <div class="group-name">
+                                    <span>Suporte Premium</span>
+                                    <span class="status-badge active">Ativo</span>
+                                </div>
+                                <div class="group-meta">
+                                    <span>89 membros</span>
+                                    <span class="group-meta-separator"></span>
+                                    <span>Workspace Suporte</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="group-metrics">
+                            <div class="metric">
+                                <div class="metric-value">1.8k</div>
+                                <div class="metric-label">Mensagens/mês</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">156</div>
+                                <div class="metric-label">Tickets</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">100%</div>
+                                <div class="metric-label">Uptime</div>
+                            </div>
+                        </div>
+                        <div class="group-tags">
+                            <span class="tag">Support</span>
+                            <span class="tag">24/7</span>
+                        </div>
+                        <div class="quick-actions">
+                            <button class="quick-action" onclick="event.stopPropagation(); openConfig(2)">
+                                <i class="fas fa-cog"></i>
+                                Config
+                            </button>
+                            <button class="quick-action pause" onclick="event.stopPropagation(); pauseGroup(2)">
+                                <i class="fas fa-pause"></i>
+                                Pausar
+                            </button>
+                            <button class="quick-action delete" onclick="event.stopPropagation(); deleteGroup(2)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Group Card 3 -->
+                    <div class="group-card animate-in" style="animation-delay: 0.15s;" onclick="openGroupDetail(3)">
+                        <div class="group-card-checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)"></div>
+                        <div class="group-card-header">
+                            <div class="group-avatar" style="background: linear-gradient(135deg, #0088cc, #229ED9);">
+                                <span>🤖</span>
+                                <div class="channel-indicator telegram">
+                                    <i class="fab fa-telegram"></i>
+                                </div>
+                            </div>
+                            <div class="group-info">
+                                <div class="group-name">
+                                    <span>AI Enthusiasts</span>
+                                    <span class="status-badge paused">Pausado</span>
+                                </div>
+                                <div class="group-meta">
+                                    <span>312 membros</span>
+                                    <span class="group-meta-separator"></span>
+                                    <span>Workspace Dev</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="group-metrics">
+                            <div class="metric">
+                                <div class="metric-value">956</div>
+                                <div class="metric-label">Mensagens/mês</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">45</div>
+                                <div class="metric-label">Comandos</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">85%</div>
+                                <div class="metric-label">Uptime</div>
+                            </div>
+                        </div>
+                        <div class="group-tags">
+                            <span class="tag">AI/ML</span>
+                            <span class="tag">Community</span>
+                        </div>
+                        <div class="quick-actions">
+                            <button class="quick-action" onclick="event.stopPropagation(); openConfig(3)">
+                                <i class="fas fa-cog"></i>
+                                Config
+                            </button>
+                            <button class="quick-action" onclick="event.stopPropagation(); activateGroup(3)" style="color: var(--success);">
+                                <i class="fas fa-play"></i>
+                                Ativar
+                            </button>
+                            <button class="quick-action delete" onclick="event.stopPropagation(); deleteGroup(3)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Group Card 4 -->
+                    <div class="group-card animate-in" style="animation-delay: 0.2s;" onclick="openGroupDetail(4)">
+                        <div class="group-card-checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)"></div>
+                        <div class="group-card-header">
+                            <div class="group-avatar" style="background: linear-gradient(135deg, #4A154B, #611f69);">
+                                <span>💼</span>
+                                <div class="channel-indicator slack">
+                                    <i class="fab fa-slack"></i>
+                                </div>
+                            </div>
+                            <div class="group-info">
+                                <div class="group-name">
+                                    <span>Empresa XYZ</span>
+                                    <span class="status-badge active">Ativo</span>
+                                </div>
+                                <div class="group-meta">
+                                    <span>45 membros</span>
+                                    <span class="group-meta-separator"></span>
+                                    <span>Workspace Principal</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="group-metrics">
+                            <div class="metric">
+                                <div class="metric-value">3.2k</div>
+                                <div class="metric-label">Mensagens/mês</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">234</div>
+                                <div class="metric-label">Comandos</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">99%</div>
+                                <div class="metric-label">Uptime</div>
+                            </div>
+                        </div>
+                        <div class="group-tags">
+                            <span class="tag">Enterprise</span>
+                            <span class="tag">B2B</span>
+                        </div>
+                        <div class="quick-actions">
+                            <button class="quick-action" onclick="event.stopPropagation(); openConfig(4)">
+                                <i class="fas fa-cog"></i>
+                                Config
+                            </button>
+                            <button class="quick-action pause" onclick="event.stopPropagation(); pauseGroup(4)">
+                                <i class="fas fa-pause"></i>
+                                Pausar
+                            </button>
+                            <button class="quick-action delete" onclick="event.stopPropagation(); deleteGroup(4)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Group Card 5 -->
+                    <div class="group-card animate-in" style="animation-delay: 0.25s;" onclick="openGroupDetail(5)">
+                        <div class="group-card-checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)"></div>
+                        <div class="group-card-header">
+                            <div class="group-avatar" style="background: linear-gradient(135deg, #25D366, #128C7E);">
+                                <span>🎮</span>
+                                <div class="channel-indicator whatsapp">
+                                    <i class="fab fa-whatsapp"></i>
+                                </div>
+                            </div>
+                            <div class="group-info">
+                                <div class="group-name">
+                                    <span>Gaming BR</span>
+                                    <span class="status-badge inactive">Inativo</span>
+                                </div>
+                                <div class="group-meta">
+                                    <span>256 membros</span>
+                                    <span class="group-meta-separator"></span>
+                                    <span>Workspace Principal</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="group-metrics">
+                            <div class="metric">
+                                <div class="metric-value">0</div>
+                                <div class="metric-label">Mensagens/mês</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">0</div>
+                                <div class="metric-label">Comandos</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">0%</div>
+                                <div class="metric-label">Uptime</div>
+                            </div>
+                        </div>
+                        <div class="group-tags">
+                            <span class="tag">Gaming</span>
+                            <span class="tag">Comunidade</span>
+                        </div>
+                        <div class="quick-actions">
+                            <button class="quick-action" onclick="event.stopPropagation(); openConfig(5)">
+                                <i class="fas fa-cog"></i>
+                                Config
+                            </button>
+                            <button class="quick-action" onclick="event.stopPropagation(); activateGroup(5)" style="color: var(--success);">
+                                <i class="fas fa-play"></i>
+                                Ativar
+                            </button>
+                            <button class="quick-action delete" onclick="event.stopPropagation(); deleteGroup(5)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Group Card 6 -->
+                    <div class="group-card animate-in" style="animation-delay: 0.3s;" onclick="openGroupDetail(6)">
+                        <div class="group-card-checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)"></div>
+                        <div class="group-card-header">
+                            <div class="group-avatar" style="background: linear-gradient(135deg, #5865F2, #7289DA);">
+                                <span>📚</span>
+                                <div class="channel-indicator discord">
+                                    <i class="fab fa-discord"></i>
+                                </div>
+                            </div>
+                            <div class="group-info">
+                                <div class="group-name">
+                                    <span>Curso Online</span>
+                                    <span class="status-badge active">Ativo</span>
+                                </div>
+                                <div class="group-meta">
+                                    <span>1.2k membros</span>
+                                    <span class="group-meta-separator"></span>
+                                    <span>Workspace Dev</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="group-metrics">
+                            <div class="metric">
+                                <div class="metric-value">5.6k</div>
+                                <div class="metric-label">Mensagens/mês</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">892</div>
+                                <div class="metric-label">Comandos</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">100%</div>
+                                <div class="metric-label">Uptime</div>
+                            </div>
+                        </div>
+                        <div class="group-tags">
+                            <span class="tag">Education</span>
+                            <span class="tag">Premium</span>
+                            <span class="tag">1k+</span>
+                        </div>
+                        <div class="quick-actions">
+                            <button class="quick-action" onclick="event.stopPropagation(); openConfig(6)">
+                                <i class="fas fa-cog"></i>
+                                Config
+                            </button>
+                            <button class="quick-action pause" onclick="event.stopPropagation(); pauseGroup(6)">
+                                <i class="fas fa-pause"></i>
+                                Pausar
+                            </button>
+                            <button class="quick-action delete" onclick="event.stopPropagation(); deleteGroup(6)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- List View -->
+                <div class="groups-list" id="groupsList">
+                    <!-- Row 1 -->
+                    <div class="group-row" onclick="openGroupDetail(1)">
+                        <div class="group-row-checkbox" onclick="event.stopPropagation(); toggleSelect(this.parentElement)"></div>
+                        <div class="group-row-avatar" style="background: linear-gradient(135deg, #25D366, #128C7E);">
+                            <span>🚀</span>
+                            <div class="channel-indicator whatsapp" style="width: 18px; height: 18px; font-size: 9px;">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                        </div>
+                        <div class="group-row-info">
+                            <div class="group-row-name">
+                                Dev Team Brasil
+                                <span class="status-badge active">Ativo</span>
+                            </div>
+                            <div class="group-row-meta">156 membros • Workspace Principal</div>
+                        </div>
+                        <div class="group-row-metrics">
+                            <div class="group-row-metric">
+                                <div class="group-row-metric-value">2.4k</div>
+                                <div class="group-row-metric-label">Msgs/mês</div>
+                            </div>
+                            <div class="group-row-metric">
+                                <div class="group-row-metric-value">89</div>
+                                <div class="group-row-metric-label">Comandos</div>
+                            </div>
+                            <div class="group-row-metric">
+                                <div class="group-row-metric-value">98%</div>
+                                <div class="group-row-metric-label">Uptime</div>
+                            </div>
+                        </div>
+                        <div class="group-row-actions">
+                            <button class="btn btn-ghost btn-icon" onclick="event.stopPropagation(); openConfig(1)">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <button class="btn btn-ghost btn-icon" onclick="event.stopPropagation(); pauseGroup(1)">
+                                <i class="fas fa-pause"></i>
+                            </button>
+                            <button class="btn btn-ghost btn-icon" onclick="event.stopPropagation(); deleteGroup(1)" style="color: var(--error);">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mais rows seguem o mesmo padrão -->
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3 class="empty-title">Nenhum grupo encontrado</h3>
+                    <p class="empty-description">
+                        Você ainda não tem grupos conectados. Adicione seu primeiro grupo para começar a usar o BaaS.
+                    </p>
+                    <button class="btn btn-primary" onclick="openAddModal()">
+                        <i class="fas fa-plus"></i>
+                        Adicionar Primeiro Grupo
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Group Modal -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal-wizard">
+            <div class="wizard-header">
+                <h2 class="wizard-title">Adicionar Novo Grupo</h2>
+                <div class="wizard-steps">
+                    <div class="wizard-step active" data-step="1">
+                        <div class="wizard-step-number">1</div>
+                        <span class="wizard-step-text">Canal</span>
+                    </div>
+                    <div class="wizard-step" data-step="2">
+                        <div class="wizard-step-number">2</div>
+                        <span class="wizard-step-text">Grupo</span>
+                    </div>
+                    <div class="wizard-step" data-step="3">
+                        <div class="wizard-step-number">3</div>
+                        <span class="wizard-step-text">Configurar</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-body">
+                <!-- Step 1: Channel -->
+                <div class="wizard-panel active" data-panel="1">
+                    <div class="form-group">
+                        <label class="form-label">Selecione o canal de comunicação</label>
+                        <div class="channel-selector">
+                            <div class="channel-option selected" onclick="selectChannel(this, 'whatsapp')">
+                                <div class="channel-option-icon" style="background: var(--whatsapp);">
+                                    <i class="fab fa-whatsapp"></i>
+                                </div>
+                                <div class="channel-option-text">
+                                    <div class="channel-option-name">WhatsApp</div>
+                                    <div class="channel-option-desc">Grupos e mensagens diretas</div>
+                                </div>
+                            </div>
+                            <div class="channel-option" onclick="selectChannel(this, 'telegram')">
+                                <div class="channel-option-icon" style="background: var(--telegram);">
+                                    <i class="fab fa-telegram"></i>
+                                </div>
+                                <div class="channel-option-text">
+                                    <div class="channel-option-name">Telegram</div>
+                                    <div class="channel-option-desc">Grupos e supergrupos</div>
+                                </div>
+                            </div>
+                            <div class="channel-option" onclick="selectChannel(this, 'discord')">
+                                <div class="channel-option-icon" style="background: var(--discord);">
+                                    <i class="fab fa-discord"></i>
+                                </div>
+                                <div class="channel-option-text">
+                                    <div class="channel-option-name">Discord</div>
+                                    <div class="channel-option-desc">Servidores e canais</div>
+                                </div>
+                            </div>
+                            <div class="channel-option" onclick="selectChannel(this, 'slack')">
+                                <div class="channel-option-icon" style="background: var(--slack);">
+                                    <i class="fab fa-slack"></i>
+                                </div>
+                                <div class="channel-option-text">
+                                    <div class="channel-option-name">Slack</div>
+                                    <div class="channel-option-desc">Workspaces e canais</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Group -->
+                <div class="wizard-panel" data-panel="2">
+                    <div class="form-group">
+                        <label class="form-label">ID ou Link do Grupo</label>
+                        <input type="text" class="form-input" placeholder="Ex: https://chat.whatsapp.com/..." id="groupIdInput">
+                        <p class="form-helper">Cole o link de convite ou ID do grupo</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nome de exibição (opcional)</label>
+                        <input type="text" class="form-input" placeholder="Ex: Equipe de Vendas" id="groupNameInput">
+                        <p class="form-helper">Nome personalizado para identificar o grupo no dashboard</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Workspace</label>
+                        <div class="workspace-selector">
+                            <div class="workspace-option selected" onclick="selectWorkspace(this, 'main')">
+                                <div class="workspace-option-icon">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <span class="workspace-option-name">Workspace Principal</span>
+                                <div class="workspace-option-check"></div>
+                            </div>
+                            <div class="workspace-option" onclick="selectWorkspace(this, 'dev')">
+                                <div class="workspace-option-icon">
+                                    <i class="fas fa-code"></i>
+                                </div>
+                                <span class="workspace-option-name">Desenvolvimento</span>
+                                <div class="workspace-option-check"></div>
+                            </div>
+                            <div class="workspace-option" onclick="selectWorkspace(this, 'support')">
+                                <div class="workspace-option-icon">
+                                    <i class="fas fa-headset"></i>
+                                </div>
+                                <span class="workspace-option-name">Suporte</span>
+                                <div class="workspace-option-check"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Configure -->
+                <div class="wizard-panel" data-panel="3">
+                    <div class="form-group">
+                        <label class="form-label">Agente</label>
+                        <select class="form-input">
+                            <option>Assistente Padrão</option>
+                            <option>Suporte Técnico</option>
+                            <option>Vendas</option>
+                            <option>Onboarding</option>
+                        </select>
+                        <p class="form-helper">Selecione o agente que irá responder neste grupo</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tags</label>
+                        <input type="text" class="form-input" placeholder="Separe as tags por vírgula" id="tagsInput">
+                        <p class="form-helper">Tags ajudam a organizar e filtrar seus grupos</p>
+                    </div>
+
+                    <div class="config-card">
+                        <div class="config-row">
+                            <div>
+                                <div class="config-label">Ativar imediatamente</div>
+                                <div class="config-desc">O bot começará a responder assim que adicionado</div>
+                            </div>
+                            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <div class="config-row">
+                            <div>
+                                <div class="config-label">Responder menções</div>
+                                <div class="config-desc">Responder apenas quando mencionado</div>
+                            </div>
+                            <div class="toggle" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <div class="config-row">
+                            <div>
+                                <div class="config-label">Salvar histórico</div>
+                                <div class="config-desc">Manter registro das conversas</div>
+                            </div>
+                            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-footer">
+                <button class="btn btn-ghost" onclick="closeAddModal()">Cancelar</button>
+                <div>
+                    <button class="btn btn-secondary" id="wizardPrev" onclick="wizardPrevStep()" style="display: none;">
+                        <i class="fas fa-arrow-left"></i>
+                        Voltar
+                    </button>
+                    <button class="btn btn-primary" id="wizardNext" onclick="wizardNextStep()">
+                        Próximo
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Detail Modal -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-detail">
+            <div class="detail-close" onclick="closeDetailModal()">
+                <i class="fas fa-times"></i>
+            </div>
+            
+            <div class="detail-header">
+                <div class="detail-avatar" style="background: linear-gradient(135deg, #25D366, #128C7E);">
+                    <span>🚀</span>
+                    <div class="channel-indicator whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                </div>
+                <div class="detail-info">
+                    <h2 class="detail-name">
+                        Dev Team Brasil
+                        <span class="status-badge active">Ativo</span>
+                    </h2>
+                    <div class="detail-meta">
+                        <span class="detail-meta-item">
+                            <i class="fas fa-users"></i>
+                            156 membros
+                        </span>
+                        <span class="detail-meta-item">
+                            <i class="fas fa-calendar"></i>
+                            Criado em 15 Jan 2024
+                        </span>
+                        <span class="detail-meta-item">
+                            <i class="fas fa-robot"></i>
+                            Assistente Padrão
+                        </span>
+                    </div>
+                </div>
+                <div class="detail-actions">
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-pause"></i>
+                        Pausar
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-cog"></i>
+                        Configurar
+                    </button>
+                </div>
+            </div>
+
+            <div class="detail-tabs">
+                <div class="detail-tab active" onclick="switchDetailTab('overview')">Overview</div>
+                <div class="detail-tab" onclick="switchDetailTab('config')">Configurações</div>
+                <div class="detail-tab" onclick="switchDetailTab('history')">Histórico</div>
+                <div class="detail-tab" onclick="switchDetailTab('memory')">Memória</div>
+            </div>
+
+            <div class="detail-body">
+                <!-- Overview Panel -->
+                <div class="detail-panel active" data-panel="overview">
+                    <div class="overview-stats">
+                        <div class="overview-stat">
+                            <div class="overview-stat-label">Mensagens este mês</div>
+                            <div class="overview-stat-value">2,456</div>
+                            <div class="overview-stat-change">
+                                <i class="fas fa-arrow-up"></i> +12% vs mês anterior
+                            </div>
+                        </div>
+                        <div class="overview-stat">
+                            <div class="overview-stat-label">Comandos executados</div>
+                            <div class="overview-stat-value">89</div>
+                            <div class="overview-stat-change">
+                                <i class="fas fa-arrow-up"></i> +5% vs mês anterior
+                            </div>
+                        </div>
+                        <div class="overview-stat">
+                            <div class="overview-stat-label">Tempo de resposta</div>
+                            <div class="overview-stat-value">1.2s</div>
+                            <div class="overview-stat-change" style="color: var(--success);">
+                                Excelente
+                            </div>
+                        </div>
+                        <div class="overview-stat">
+                            <div class="overview-stat-label">Uptime</div>
+                            <div class="overview-stat-value">98%</div>
+                            <div class="overview-stat-change" style="color: var(--success);">
+                                Saudável
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="section-title">
+                        <i class="fas fa-clock"></i>
+                        Atividade Recente
+                    </h3>
+                    <div class="activity-timeline">
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-paper-plane"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">
+                                    <strong>Bot</strong> respondeu a uma pergunta sobre API
+                                </div>
+                                <div class="activity-time">Há 5 minutos</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-terminal"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">
+                                    <strong>@usuario123</strong> executou comando /help
+                                </div>
+                                <div class="activity-time">Há 12 minutos</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">
+                                    <strong>3 novos membros</strong> entraram no grupo
+                                </div>
+                                <div class="activity-time">Há 1 hora</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">
+                                    Configuração de <strong>auto-resposta</strong> atualizada
+                                </div>
+                                <div class="activity-time">Há 3 horas</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Config Panel -->
+                <div class="detail-panel" data-panel="config">
+                    <div class="config-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-sliders-h"></i>
+                            Comportamento
+                        </h3>
+                        <div class="config-card">
+                            <div class="config-row">
+                                <div>
+                                    <div class="config-label">Bot ativo</div>
+                                    <div class="config-desc">O bot está respondendo mensagens</div>
+                                </div>
+                                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <div class="config-row">
+                                <div>
+                                    <div class="config-label">Responder apenas menções</div>
+                                    <div class="config-desc">Responde apenas quando é mencionado diretamente</div>
+                                </div>
+                                <div class="toggle" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <div class="config-row">
+                                <div>
+                                    <div class="config-label">Processar mídias</div>
+                                    <div class="config-desc">Analisar imagens, áudios e documentos</div>
+                                </div>
+                                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <div class="config-row">
+                                <div>
+                                    <div class="config-label">Modo silencioso</div>
+                                    <div class="config-desc">Não enviar notificações de status</div>
+                                </div>
+                                <div class="toggle" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-database"></i>
+                            Dados e Privacidade
+                        </h3>
+                        <div class="config-card">
+                            <div class="config-row">
+                                <div>
+                                    <div class="config-label">Salvar histórico</div>
+                                    <div class="config-desc">Manter registro das conversas</div>
+                                </div>
+                                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <div class="config-row">
+                                <div>
+                                    <div class="config-label">Memória de contexto</div>
+                                    <div class="config-desc">Lembrar conversas anteriores</div>
+                                </div>
+                                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            <div class="config-row">
+                                <div>
+                                    <div class="config-label">Anonimizar dados</div>
+                                    <div class="config-desc">Remover informações pessoais dos logs</div>
+                                </div>
+                                <div class="toggle" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Panel -->
+                <div class="detail-panel" data-panel="history">
+                    <div class="history-filters">
+                        <button class="btn btn-secondary btn-sm active">
+                            <i class="fas fa-list"></i>
+                            Todos
+                        </button>
+                        <button class="btn btn-ghost btn-sm">
+                            <i class="fas fa-paper-plane"></i>
+                            Mensagens
+                        </button>
+                        <button class="btn btn-ghost btn-sm">
+                            <i class="fas fa-terminal"></i>
+                            Comandos
+                        </button>
+                        <button class="btn btn-ghost btn-sm">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Erros
+                        </button>
+                    </div>
+
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Usuário</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="event-type message"><i class="fas fa-paper-plane"></i> Mensagem</span></td>
+                                <td>Resposta sobre documentação da API</td>
+                                <td>@joao.silva</td>
+                                <td>Hoje, 14:32</td>
+                            </tr>
+                            <tr>
+                                <td><span class="event-type command"><i class="fas fa-terminal"></i> Comando</span></td>
+                                <td>/help executado</td>
+                                <td>@maria.santos</td>
+                                <td>Hoje, 14:28</td>
+                            </tr>
+                            <tr>
+                                <td><span class="event-type message"><i class="fas fa-paper-plane"></i> Mensagem</span></td>
+                                <td>Explicação sobre webhooks</td>
+                                <td>@pedro.costa</td>
+                                <td>Hoje, 13:45</td>
+                            </tr>
+                            <tr>
+                                <td><span class="event-type error"><i class="fas fa-times"></i> Erro</span></td>
+                                <td>Timeout na conexão com API</td>
+                                <td>Sistema</td>
+                                <td>Hoje, 12:15</td>
+                            </tr>
+                            <tr>
+                                <td><span class="event-type config"><i class="fas fa-cog"></i> Config</span></td>
+                                <td>Configuração de auto-resposta atualizada</td>
+                                <td>@admin</td>
+                                <td>Hoje, 10:00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Memory Panel -->
+                <div class="detail-panel" data-panel="memory">
+                    <div class="memory-stats">
+                        <div class="memory-card">
+                            <div class="memory-card-header">
+                                <span class="memory-card-title">Contextos Salvos</span>
+                                <i class="fas fa-database" style="color: var(--accent-primary);"></i>
+                            </div>
+                            <div class="memory-card-value">156</div>
+                            <div class="memory-progress">
+                                <div class="memory-progress-bar" style="width: 65%;"></div>
+                            </div>
+                        </div>
+                        <div class="memory-card">
+                            <div class="memory-card-header">
+                                <span class="memory-card-title">Tokens Utilizados</span>
+                                <i class="fas fa-coins" style="color: var(--warning);"></i>
+                            </div>
+                            <div class="memory-card-value">24.5k</div>
+                            <div class="memory-progress">
+                                <div class="memory-progress-bar" style="width: 45%;"></div>
+                            </div>
+                        </div>
+                        <div class="memory-card">
+                            <div class="memory-card-header">
+                                <span class="memory-card-title">Última Sincronização</span>
+                                <i class="fas fa-sync" style="color: var(--success);"></i>
+                            </div>
+                            <div class="memory-card-value" style="font-size: 18px;">Há 5 min</div>
+                        </div>
+                    </div>
+
+                    <h3 class="section-title">
+                        <i class="fas fa-brain"></i>
+                        Contexto Salvo
+                    </h3>
+                    <div class="context-list">
+                        <div class="context-item">
+                            <div class="context-item-header">
+                                <span class="context-item-key">user_preferences</span>
+                                <span class="context-item-time">Atualizado há 2h</span>
+                            </div>
+                            <div class="context-item-value">
+                                Preferência de linguagem: Português BR. Nível técnico: Avançado. Tópicos de interesse: API, Webhooks, Integrações.
+                            </div>
+                        </div>
+                        <div class="context-item">
+                            <div class="context-item-header">
+                                <span class="context-item-key">conversation_summary</span>
+                                <span class="context-item-time">Atualizado há 30min</span>
+                            </div>
+                            <div class="context-item-value">
+                                Última conversa sobre implementação de webhooks para notificações em tempo real. Usuário está desenvolvendo integração com sistema ERP.
+                            </div>
+                        </div>
+                        <div class="context-item">
+                            <div class="context-item-header">
+                                <span class="context-item-key">group_topics</span>
+                                <span class="context-item-time">Atualizado há 1d</span>
+                            </div>
+                            <div class="context-item-value">
+                                Tópicos frequentes: Desenvolvimento de software, JavaScript, Node.js, APIs RESTful, DevOps, Cloud Computing.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 24px; display: flex; gap: 12px;">
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-sync"></i>
+                            Sincronizar Agora
+                        </button>
+                        <button class="btn btn-danger">
+                            <i class="fas fa-trash"></i>
+                            Limpar Memória
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // State
+        let currentView = 'grid';
+        let selectedGroups = new Set();
+        let currentWizardStep = 1;
+        let currentDetailTab = 'overview';
+
+        // View Toggle
+        function setView(view) {
+            currentView = view;
+            const container = document.getElementById('groupsContainer');
+            const toggleBtns = document.querySelectorAll('.view-toggle-btn');
+            
+            toggleBtns.forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.view-toggle-btn').classList.add('active');
+            
+            if (view === 'list') {
+                container.classList.add('list-view');
+            } else {
+                container.classList.remove('list-view');
+            }
+        }
+
+        // Search & Autocomplete
+        function handleSearch(value) {
+            // Implement search logic
+            console.log('Searching:', value);
+        }
+
+        function showAutocomplete() {
+            document.getElementById('autocompleteDropdown').classList.add('show');
+        }
+
+        function hideAutocomplete() {
+            setTimeout(() => {
+                document.getElementById('autocompleteDropdown').classList.remove('show');
+            }, 200);
+        }
+
+        // Filters
+        function toggleFilter(filter) {
+            const menu = document.getElementById(`filter-${filter}`);
+            document.querySelectorAll('.filter-menu').forEach(m => {
+                if (m !== menu) m.classList.remove('show');
+            });
+            menu.classList.toggle('show');
+        }
+
+        function selectFilter(filter, value) {
+            const menu = document.getElementById(`filter-${filter}`);
+            menu.querySelectorAll('.filter-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            event.target.closest('.filter-option').classList.add('selected');
+            menu.classList.remove('show');
+            
+            // Update filter button
+            const btn = menu.previousElementSibling;
+            if (value !== 'all') {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+            
+            showToast('success', `Filtro aplicado: ${value}`);
+        }
+
+        // Close menus on outside click
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.filter-dropdown')) {
+                document.querySelectorAll('.filter-menu').forEach(m => m.classList.remove('show'));
+            }
+        });
+
+        // Selection
+        function toggleSelect(card) {
+            card.classList.toggle('selected');
+            const groupId = card.dataset?.groupId || Math.random();
+            
+            if (card.classList.contains('selected')) {
+                selectedGroups.add(groupId);
+            } else {
+                selectedGroups.delete(groupId);
+            }
+            
+            updateBulkActions();
+        }
+
+        function updateBulkActions() {
+            const bulkActions = document.getElementById('bulkActions');
+            const count = document.getElementById('selectedCount');
+            
+            if (selectedGroups.size > 0) {
+                bulkActions.classList.add('show');
+                count.textContent = selectedGroups.size;
+            } else {
+                bulkActions.classList.remove('show');
+            }
+        }
+
+        function clearSelection() {
+            selectedGroups.clear();
+            document.querySelectorAll('.group-card.selected, .group-row.selected').forEach(card => {
+                card.classList.remove('selected');
+            });
+            updateBulkActions();
+        }
+
+        // Bulk Actions
+        function bulkPause() {
+            showToast('success', `${selectedGroups.size} grupos pausados`);
+            clearSelection();
+        }
+
+        function bulkActivate() {
+            showToast('success', `${selectedGroups.size} grupos ativados`);
+            clearSelection();
+        }
+
+        function bulkDelete() {
+            if (confirm(`Tem certeza que deseja excluir ${selectedGroups.size} grupos?`)) {
+                showToast('success', `${selectedGroups.size} grupos excluídos`);
+                clearSelection();
+            }
+        }
+
+        // Quick Actions
+        function pauseGroup(id) {
+            showToast('warning', 'Grupo pausado');
+        }
+
+        function activateGroup(id) {
+            showToast('success', 'Grupo ativado');
+        }
+
+        function deleteGroup(id) {
+            if (confirm('Tem certeza que deseja excluir este grupo?')) {
+                showToast('success', 'Grupo excluído');
+            }
+        }
+
+        function openConfig(id) {
+            // Open config modal or navigate to config page
+            showToast('success', 'Abrindo configurações...');
+        }
+
+        // Add Modal
+        function openAddModal() {
+            document.getElementById('addModal').classList.add('show');
+            currentWizardStep = 1;
+            updateWizardUI();
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.remove('show');
+        }
+
+        function wizardNextStep() {
+            if (currentWizardStep < 3) {
+                currentWizardStep++;
+                updateWizardUI();
+            } else {
+                // Submit
+                showToast('success', 'Grupo adicionado com sucesso!');
+                closeAddModal();
+            }
+        }
+
+        function wizardPrevStep() {
+            if (currentWizardStep > 1) {
+                currentWizardStep--;
+                updateWizardUI();
+            }
+        }
+
+        function updateWizardUI() {
+            // Update steps
+            document.querySelectorAll('.wizard-step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index + 1 < currentWizardStep) {
+                    step.classList.add('completed');
+                } else if (index + 1 === currentWizardStep) {
+                    step.classList.add('active');
+                }
+            });
+            
+            // Update panels
+            document.querySelectorAll('.wizard-panel').forEach((panel, index) => {
+                panel.classList.remove('active');
+                if (index + 1 === currentWizardStep) {
+                    panel.classList.add('active');
+                }
+            });
+            
+            // Update buttons
+            document.getElementById('wizardPrev').style.display = currentWizardStep > 1 ? 'inline-flex' : 'none';
+            document.getElementById('wizardNext').innerHTML = currentWizardStep === 3 
+                ? '<i class="fas fa-check"></i> Adicionar Grupo' 
+                : 'Próximo <i class="fas fa-arrow-right"></i>';
+        }
+
+        function selectChannel(element, channel) {
+            document.querySelectorAll('.channel-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        function selectWorkspace(element, workspace) {
+            document.querySelectorAll('.workspace-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        // Detail Modal
+        function openGroupDetail(id) {
+            document.getElementById('detailModal').classList.add('show');
+            currentDetailTab = 'overview';
+            updateDetailTabs();
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.remove('show');
+        }
+
+        function switchDetailTab(tab) {
+            currentDetailTab = tab;
+            updateDetailTabs();
+        }
+
+        function updateDetailTabs() {
+            document.querySelectorAll('.detail-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.textContent.toLowerCase().includes(currentDetailTab)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            document.querySelectorAll('.detail-panel').forEach(panel => {
+                panel.classList.remove('active');
+                if (panel.dataset.panel === currentDetailTab) {
+                    panel.classList.add('active');
+                }
+            });
+        }
+
+        // Toast
+        function showToast(type, message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-times-circle',
+                warning: 'fa-exclamation-circle'
+            };
+            
+            toast.innerHTML = `
+                <i class="fas ${icons[type]} toast-icon"></i>
+                <span class="toast-message">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Docs
+        function showDocs() {
+            showToast('success', 'Abrindo documentação...');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Cmd/Ctrl + K for search
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+            
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                closeAddModal();
+                closeDetailModal();
+            }
+        });
+    </script>
+</body>
+</html>

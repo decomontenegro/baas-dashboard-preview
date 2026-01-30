@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrações - BaaS Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item:hover { background: rgba(99, 102, 241, 0.1); }
+        .sidebar-item.active { background: rgba(99, 102, 241, 0.15); border-right: 3px solid #6366f1; }
+        .card { transition: all 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .integration-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .integration-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15); }
+        .integration-card.connected { border-color: #10b981; }
+        .modal { transition: opacity 0.2s, visibility 0.2s; }
+        .modal.active { opacity: 1; visibility: visible; }
+        .modal-content { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .modal.active .modal-content { transform: scale(1) translateY(0); }
+        .status-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        .tab-active { border-color: #6366f1; color: #6366f1; background: rgba(99, 102, 241, 0.05); }
+        .category-chip.active { background: #6366f1; color: white; }
+        .copy-tooltip { opacity: 0; transition: opacity 0.2s; }
+        .copy-tooltip.show { opacity: 1; }
+        .step-indicator.active { background: #6366f1; color: white; }
+        .step-indicator.completed { background: #10b981; color: white; }
+        .log-entry:hover { background: rgba(99, 102, 241, 0.05); }
+        .api-key-hidden { filter: blur(4px); user-select: none; }
+        .health-bar { height: 4px; border-radius: 2px; overflow: hidden; }
+        .health-bar-fill { transition: width 0.5s ease; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white text-xl">🤖</span>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-gray-900">BaaS</h1>
+                        <p class="text-xs text-gray-500">Brand Voice AI</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex-1 p-4">
+                <ul class="space-y-1">
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
+                        <span>🏠</span> Overview
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
+                        <span>📱</span> Grupos & Canais
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
+                        <span>🎭</span> Comportamento
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
+                        <span>⚡</span> Funcionalidades
+                    </li>
+                    <li class="sidebar-item active rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-indigo-600">
+                        <span>🔌</span> Integrações
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
+                        <span>💰</span> Billing
+                    </li>
+                    <li class="sidebar-item rounded-lg px-4 py-3 cursor-pointer flex items-center gap-3 text-gray-600">
+                        <span>⚙️</span> Admin
+                    </li>
+                </ul>
+            </nav>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">L</div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Liqi</p>
+                        <p class="text-xs text-gray-500">Business Plan</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-auto">
+            <!-- Header -->
+            <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between sticky top-0 z-10">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Integrações</h2>
+                    <p class="text-sm text-gray-500">Conecte seu bot com suas ferramentas favoritas</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg">
+                        <span class="w-2 h-2 bg-green-500 rounded-full status-pulse"></span>
+                        <span class="text-sm text-green-700">2 conectadas</span>
+                    </div>
+                    <button onclick="openModal('request-modal')" class="px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                        Solicitar Integração
+                    </button>
+                </div>
+            </header>
+
+            <!-- Tabs -->
+            <div class="bg-white border-b border-gray-200 px-8">
+                <div class="flex gap-1">
+                    <button onclick="switchTab('apps')" id="tab-apps" class="tab-active px-4 py-3 text-sm font-medium border-b-2 border-transparent transition-all">
+                        🧩 App Store
+                    </button>
+                    <button onclick="switchTab('webhooks')" id="tab-webhooks" class="px-4 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-all">
+                        🔗 Webhooks
+                    </button>
+                    <button onclick="switchTab('api-keys')" id="tab-api-keys" class="px-4 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-all">
+                        🔑 API Keys
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-8">
+                <!-- App Store Tab -->
+                <div id="content-apps">
+                    <!-- Category Filter -->
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="text-sm text-gray-500">Filtrar:</span>
+                        <div class="flex gap-2">
+                            <button onclick="filterCategory('all')" class="category-chip active px-3 py-1.5 text-sm rounded-full border border-gray-200 transition-all">
+                                Todas
+                            </button>
+                            <button onclick="filterCategory('productivity')" class="category-chip px-3 py-1.5 text-sm rounded-full border border-gray-200 text-gray-600 hover:border-indigo-300 transition-all">
+                                🗂️ Produtividade
+                            </button>
+                            <button onclick="filterCategory('crm')" class="category-chip px-3 py-1.5 text-sm rounded-full border border-gray-200 text-gray-600 hover:border-indigo-300 transition-all">
+                                👥 CRM
+                            </button>
+                            <button onclick="filterCategory('communication')" class="category-chip px-3 py-1.5 text-sm rounded-full border border-gray-200 text-gray-600 hover:border-indigo-300 transition-all">
+                                💬 Comunicação
+                            </button>
+                            <button onclick="filterCategory('developer')" class="category-chip px-3 py-1.5 text-sm rounded-full border border-gray-200 text-gray-600 hover:border-indigo-300 transition-all">
+                                👨‍💻 Developer
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Connected Integrations -->
+                    <div class="mb-8">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            Conectadas (2)
+                        </h3>
+                        <div class="grid grid-cols-3 gap-4" id="connected-grid">
+                            <!-- Google Calendar - Connected -->
+                            <div class="integration-card connected bg-white rounded-xl p-5 border-2 border-green-200 cursor-pointer" data-category="productivity" onclick="openIntegrationDetail('google-calendar')">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-gray-100">
+                                        <svg class="w-7 h-7" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12c0-.77-.07-1.5-.19-2.22H12v4.2h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.09-1.92 3.29-4.76 3.29-8.06z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                        <span class="text-xs text-green-600 font-medium">Conectado</span>
+                                    </div>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 mb-1">Google Calendar</h4>
+                                <p class="text-sm text-gray-500 mb-4">Sincronize eventos e crie reuniões automaticamente</p>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full">Produtividade</span>
+                                    </div>
+                                    <div class="flex items-center gap-1 text-xs text-gray-400">
+                                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
+                                        99.9% uptime
+                                    </div>
+                                </div>
+                                <!-- Health Bar -->
+                                <div class="health-bar bg-gray-100 mt-3">
+                                    <div class="health-bar-fill bg-green-500 h-full" style="width: 99.9%"></div>
+                                </div>
+                            </div>
+
+                            <!-- ClickUp - Connected with Warning -->
+                            <div class="integration-card bg-white rounded-xl p-5 border-2 border-yellow-200 cursor-pointer" data-category="productivity" onclick="openIntegrationDetail('clickup')">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500 rounded-xl shadow-sm flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M4.62 10.69L2.5 12.31l8.78 7.69 10.22-7.69-2.12-1.62-8.1 5.73-6.66-5.73z"/><path d="M12.28 13.59l6.22-4.66V4l-6.22 4.72L6 4v4.93l6.28 4.66z"/></svg>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <span class="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                                        <span class="text-xs text-yellow-600 font-medium">Atenção</span>
+                                    </div>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 mb-1">ClickUp</h4>
+                                <p class="text-sm text-gray-500 mb-4">Gerencie tarefas e projetos via chat</p>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full">Produtividade</span>
+                                    </div>
+                                    <div class="flex items-center gap-1 text-xs text-yellow-600">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                        Token expirando
+                                    </div>
+                                </div>
+                                <!-- Health Bar -->
+                                <div class="health-bar bg-gray-100 mt-3">
+                                    <div class="health-bar-fill bg-yellow-500 h-full" style="width: 65%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Available Integrations -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
+                            Disponíveis (5)
+                        </h3>
+                        <div class="grid grid-cols-3 gap-4" id="available-grid">
+                            <!-- Slack -->
+                            <div class="integration-card bg-white rounded-xl p-5 border border-gray-200 cursor-pointer hover:border-indigo-300" data-category="communication" onclick="openConnectModal('slack')">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-gray-100">
+                                        <svg class="w-7 h-7" viewBox="0 0 24 24"><path fill="#E01E5A" d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313z"/><path fill="#36C5F0" d="M8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312z"/><path fill="#2EB67D" d="M18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312z"/><path fill="#ECB22E" d="M15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>
+                                    </div>
+                                    <span class="px-2 py-1 bg-indigo-50 text-indigo-600 text-xs rounded-full font-medium">Popular</span>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 mb-1">Slack</h4>
+                                <p class="text-sm text-gray-500 mb-4">Notificações e comandos direto no Slack</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="px-2 py-0.5 bg-purple-50 text-purple-600 text-xs rounded-full">Comunicação</span>
+                                    <button class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Conectar →</button>
+                                </div>
+                            </div>
+
+                            <!-- Notion -->
+                            <div class="integration-card bg-white rounded-xl p-5 border border-gray-200 cursor-pointer hover:border-indigo-300" data-category="productivity" onclick="openConnectModal('notion')">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-gray-100">
+                                        <svg class="w-7 h-7" viewBox="0 0 24 24"><path fill="#000" d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.98-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.166V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952l1.448.327s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.14c-.093-.514.28-.887.747-.933zM2.64 1.782l13.728-.933c1.682-.14 2.102-.046 3.149.7l4.344 3.034c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.681 1.727l-15.458.933c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.995c0-.84.374-1.54 1.868-1.213z"/></svg>
+                                    </div>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 mb-1">Notion</h4>
+                                <p class="text-sm text-gray-500 mb-4">Crie páginas e databases via comandos</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full">Produtividade</span>
+                                    <button class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Conectar →</button>
+                                </div>
+                            </div>
+
+                            <!-- HubSpot -->
+                            <div class="integration-card bg-white rounded-xl p-5 border border-gray-200 cursor-pointer hover:border-indigo-300" data-category="crm" onclick="openConnectModal('hubspot')">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-gray-100">
+                                        <svg class="w-7 h-7" viewBox="0 0 24 24"><path fill="#FF7A59" d="M18.164 7.93V5.084a2.198 2.198 0 0 0 1.267-1.984v-.066A2.198 2.198 0 0 0 17.233.836h-.066a2.198 2.198 0 0 0-2.198 2.198v.066c0 .864.5 1.61 1.225 1.968v2.862a5.91 5.91 0 0 0-2.748 1.39l-7.29-5.67a2.636 2.636 0 0 0 .078-.626A2.626 2.626 0 1 0 3.609 5.65c.063 0 .124-.01.186-.014l7.016 5.456a5.94 5.94 0 0 0-.65 2.695 5.95 5.95 0 0 0 .694 2.79l-2.258 2.258a2.158 2.158 0 0 0-.652-.114 2.162 2.162 0 1 0 2.163 2.162c0-.229-.04-.448-.104-.656l2.21-2.21a5.919 5.919 0 0 0 3.556 1.188 5.936 5.936 0 0 0 5.94-5.937 5.936 5.936 0 0 0-2.746-5.338zm-.394 8.373a2.898 2.898 0 1 1 0-5.796 2.898 2.898 0 0 1 0 5.796z"/></svg>
+                                    </div>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 mb-1">HubSpot</h4>
+                                <p class="text-sm text-gray-500 mb-4">Gerencie contatos e deals via chat</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="px-2 py-0.5 bg-orange-50 text-orange-600 text-xs rounded-full">CRM</span>
+                                    <button class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Conectar →</button>
+                                </div>
+                            </div>
+
+                            <!-- Salesforce -->
+                            <div class="integration-card bg-white rounded-xl p-5 border border-gray-200 cursor-pointer hover:border-indigo-300" data-category="crm" onclick="openConnectModal('salesforce')">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-gray-100">
+                                        <svg class="w-8 h-8" viewBox="0 0 24 24"><path fill="#00A1E0" d="M10.006 5.415a4.195 4.195 0 0 1 3.045-1.306c1.56 0 2.954.853 3.697 2.168a4.912 4.912 0 0 1 1.965-.41c2.725 0 4.932 2.207 4.932 4.93a4.93 4.93 0 0 1-4.932 4.931c-.29 0-.573-.028-.85-.078a3.858 3.858 0 0 1-3.37 1.978c-.53 0-1.032-.108-1.49-.3a4.494 4.494 0 0 1-4.003 2.448c-1.835 0-3.44-1.1-4.142-2.676a4.229 4.229 0 0 1-.973.115C1.757 17.215 0 15.458 0 13.23c0-1.583.913-2.953 2.241-3.614a4.14 4.14 0 0 1-.186-1.234C2.055 5.65 4.21 3.5 6.942 3.5c1.57 0 2.968.733 3.879 1.874z"/></svg>
+                                    </div>
+                                    <span class="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-full font-medium">Enterprise</span>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 mb-1">Salesforce</h4>
+                                <p class="text-sm text-gray-500 mb-4">Sincronize leads e oportunidades</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="px-2 py-0.5 bg-orange-50 text-orange-600 text-xs rounded-full">CRM</span>
+                                    <button class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Conectar →</button>
+                                </div>
+                            </div>
+
+                            <!-- Zapier -->
+                            <div class="integration-card bg-white rounded-xl p-5 border border-gray-200 cursor-pointer hover:border-indigo-300" data-category="developer" onclick="openConnectModal('zapier')">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-gray-100">
+                                        <svg class="w-7 h-7" viewBox="0 0 24 24"><path fill="#FF4A00" d="M15.633 1.27l-3.472 6.015 3.472 6.015h-6.94l-3.475-6.015L8.692 1.27h6.94zm-3.47 16.447l3.47-6.018H8.693l-3.475 6.018 3.475 6.013h6.94l-3.47-6.013z"/></svg>
+                                    </div>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 mb-1">Zapier</h4>
+                                <p class="text-sm text-gray-500 mb-4">Conecte com +5000 apps via automações</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-xs rounded-full">Developer</span>
+                                    <button class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Conectar →</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Webhooks Tab -->
+                <div id="content-webhooks" class="hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Webhooks</h3>
+                            <p class="text-sm text-gray-500">Receba notificações em tempo real sobre eventos do seu bot</p>
+                        </div>
+                        <button onclick="openModal('create-webhook-modal')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                            Criar Webhook
+                        </button>
+                    </div>
+
+                    <!-- Webhooks List -->
+                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Endpoint</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Eventos</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Último envio</th>
+                                    <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900">https://api.myapp.com/webhooks/baas</p>
+                                                <p class="text-xs text-gray-500">Produção</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-wrap gap-1">
+                                            <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded">message.received</span>
+                                            <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded">task.created</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
+                                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                            Ativo
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">Há 2 minutos</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="Ver logs">
+                                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                            </button>
+                                            <button class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="Editar">
+                                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            </button>
+                                            <button class="p-1.5 hover:bg-red-50 rounded-lg transition-colors" title="Excluir">
+                                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900">https://staging.myapp.com/hooks</p>
+                                                <p class="text-xs text-gray-500">Staging</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-wrap gap-1">
+                                            <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">*</span>
+                                            <span class="text-xs text-gray-400">(Todos)</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full">
+                                            <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
+                                            Pausado
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">Há 3 dias</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                            </button>
+                                            <button class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            </button>
+                                            <button class="p-1.5 hover:bg-red-50 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Webhook Logs -->
+                    <div class="bg-white rounded-xl border border-gray-200">
+                        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                            <h4 class="font-semibold text-gray-900">Logs Recentes</h4>
+                            <div class="flex items-center gap-2">
+                                <select class="text-sm border border-gray-200 rounded-lg px-3 py-1.5">
+                                    <option>Todos os status</option>
+                                    <option>Sucesso</option>
+                                    <option>Falha</option>
+                                </select>
+                                <button class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">Ver todos →</button>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-gray-100 max-h-80 overflow-auto">
+                            <div class="log-entry px-6 py-3 flex items-center gap-4 cursor-pointer">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                <span class="text-xs text-gray-400 font-mono w-20">200 OK</span>
+                                <span class="text-sm text-gray-600 flex-1 font-mono truncate">message.received</span>
+                                <span class="text-xs text-gray-400">Há 2 min</span>
+                                <span class="text-xs text-gray-400">142ms</span>
+                            </div>
+                            <div class="log-entry px-6 py-3 flex items-center gap-4 cursor-pointer">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                <span class="text-xs text-gray-400 font-mono w-20">200 OK</span>
+                                <span class="text-sm text-gray-600 flex-1 font-mono truncate">task.created</span>
+                                <span class="text-xs text-gray-400">Há 5 min</span>
+                                <span class="text-xs text-gray-400">98ms</span>
+                            </div>
+                            <div class="log-entry px-6 py-3 flex items-center gap-4 cursor-pointer">
+                                <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                                <span class="text-xs text-red-500 font-mono w-20">500 ERR</span>
+                                <span class="text-sm text-gray-600 flex-1 font-mono truncate">message.received</span>
+                                <span class="text-xs text-gray-400">Há 12 min</span>
+                                <span class="text-xs text-gray-400">2.3s</span>
+                            </div>
+                            <div class="log-entry px-6 py-3 flex items-center gap-4 cursor-pointer">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                <span class="text-xs text-gray-400 font-mono w-20">200 OK</span>
+                                <span class="text-sm text-gray-600 flex-1 font-mono truncate">user.joined</span>
+                                <span class="text-xs text-gray-400">Há 18 min</span>
+                                <span class="text-xs text-gray-400">156ms</span>
+                            </div>
+                            <div class="log-entry px-6 py-3 flex items-center gap-4 cursor-pointer">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                <span class="text-xs text-gray-400 font-mono w-20">200 OK</span>
+                                <span class="text-sm text-gray-600 flex-1 font-mono truncate">message.received</span>
+                                <span class="text-xs text-gray-400">Há 25 min</span>
+                                <span class="text-xs text-gray-400">121ms</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Keys Tab -->
+                <div id="content-api-keys" class="hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">API Keys</h3>
+                            <p class="text-sm text-gray-500">Gerencie as chaves de acesso à sua API</p>
+                        </div>
+                        <button onclick="openModal('create-key-modal')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                            Criar Nova Key
+                        </button>
+                    </div>
+
+                    <!-- Warning Banner -->
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+                        <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        <div>
+                            <p class="text-sm font-medium text-amber-800">Mantenha suas chaves seguras!</p>
+                            <p class="text-sm text-amber-700">Nunca compartilhe suas API keys em código público ou repositórios Git.</p>
+                        </div>
+                    </div>
+
+                    <!-- API Keys List -->
+                    <div class="space-y-4">
+                        <!-- Production Key -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-5">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">Production API Key</h4>
+                                        <p class="text-xs text-gray-500">Criada em 15 Jan 2024 • Último uso: Há 5 min</p>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Ativa</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">
+                                <code id="key-prod" class="flex-1 text-sm font-mono text-gray-600 api-key-hidden">sk_live_xxxxxxxxxxxxx</code>
+                                <button onclick="toggleKeyVisibility('key-prod')" class="p-1.5 hover:bg-gray-200 rounded transition-colors" title="Mostrar/Ocultar">
+                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </button>
+                                <button onclick="copyToClipboard('sk_live_xxxxxxxxxxxxx', this)" class="p-1.5 hover:bg-gray-200 rounded transition-colors relative" title="Copiar">
+                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                    <span class="copy-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">Copiado!</span>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4 text-sm text-gray-500">
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                        Full Access
+                                    </span>
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                        24,847 requests
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Regenerar</button>
+                                    <button class="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors">Revogar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Test Key -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-5">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">Test API Key</h4>
+                                        <p class="text-xs text-gray-500">Criada em 10 Jan 2024 • Último uso: Há 2 dias</p>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">Test</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">
+                                <code id="key-test" class="flex-1 text-sm font-mono text-gray-600 api-key-hidden">sk_test_x9y8z7w6v5u4t3s2r1q0p9o8n7m6l5k4</code>
+                                <button onclick="toggleKeyVisibility('key-test')" class="p-1.5 hover:bg-gray-200 rounded transition-colors">
+                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </button>
+                                <button onclick="copyToClipboard('sk_test_x9y8z7w6v5u4t3s2r1q0p9o8n7m6l5k4', this)" class="p-1.5 hover:bg-gray-200 rounded transition-colors relative">
+                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                    <span class="copy-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">Copiado!</span>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4 text-sm text-gray-500">
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                        Read Only
+                                    </span>
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                        1,234 requests
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Regenerar</button>
+                                    <button class="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors">Revogar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Docs Link -->
+                    <div class="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Documentação da API</h4>
+                                <p class="text-sm text-gray-600">Explore endpoints, exemplos e guias de integração</p>
+                            </div>
+                        </div>
+                        <a href="#" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 flex items-center gap-2">
+                            Ver Docs
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- OAuth Connect Modal -->
+    <div id="connect-modal" class="modal fixed inset-0 bg-black/50 flex items-center justify-center z-50 opacity-0 invisible">
+        <div class="modal-content bg-white rounded-2xl w-full max-w-lg transform scale-95 -translate-y-4 shadow-2xl">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div id="modal-logo" class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center"></div>
+                        <div>
+                            <h3 id="modal-title" class="text-lg font-semibold text-gray-900">Conectar Integração</h3>
+                            <p id="modal-subtitle" class="text-sm text-gray-500">Configure sua conexão</p>
+                        </div>
+                    </div>
+                    <button onclick="closeModal('connect-modal')" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Steps Indicator -->
+            <div class="px-6 py-4 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div id="step-1" class="step-indicator active w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">1</div>
+                        <span class="text-sm text-gray-600">Autorizar</span>
+                    </div>
+                    <div class="flex-1 h-0.5 bg-gray-200 mx-3"></div>
+                    <div class="flex items-center gap-2">
+                        <div id="step-2" class="step-indicator w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">2</div>
+                        <span class="text-sm text-gray-600">Configurar</span>
+                    </div>
+                    <div class="flex-1 h-0.5 bg-gray-200 mx-3"></div>
+                    <div class="flex items-center gap-2">
+                        <div id="step-3" class="step-indicator w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">3</div>
+                        <span class="text-sm text-gray-600">Testar</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step Content -->
+            <div class="p-6">
+                <!-- Step 1: Authorize -->
+                <div id="step-content-1">
+                    <div class="text-center py-8">
+                        <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        </div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Autorização necessária</h4>
+                        <p class="text-sm text-gray-500 mb-6">Você será redirecionado para autorizar o acesso. Suas credenciais são mantidas seguras via OAuth 2.0.</p>
+                        <div class="p-4 bg-gray-50 rounded-lg text-left mb-6">
+                            <p class="text-sm font-medium text-gray-700 mb-2">Permissões solicitadas:</p>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Ler dados do workspace</li>
+                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Criar e editar itens</li>
+                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Enviar notificações</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Configure (hidden by default) -->
+                <div id="step-content-2" class="hidden">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Workspace</label>
+                            <select class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option>My Workspace</option>
+                                <option>Team Workspace</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Canal padrão</label>
+                            <select class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option>#geral</option>
+                                <option>#notificações</option>
+                                <option>#bot-alerts</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Eventos para notificar</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" checked class="w-4 h-4 text-indigo-600 rounded border-gray-300">
+                                    <span class="text-sm text-gray-600">Novas mensagens</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" checked class="w-4 h-4 text-indigo-600 rounded border-gray-300">
+                                    <span class="text-sm text-gray-600">Tarefas criadas</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" class="w-4 h-4 text-indigo-600 rounded border-gray-300">
+                                    <span class="text-sm text-gray-600">Erros e alertas</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Test (hidden by default) -->
+                <div id="step-content-3" class="hidden">
+                    <div class="text-center py-8">
+                        <div id="test-loading" class="hidden">
+                            <div class="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+                            <p class="text-sm text-gray-500">Testando conexão...</p>
+                        </div>
+                        <div id="test-success">
+                            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-2">Conexão estabelecida!</h4>
+                            <p class="text-sm text-gray-500 mb-4">A integração foi configurada com sucesso e está pronta para uso.</p>
+                            <div class="p-4 bg-gray-50 rounded-lg text-left">
+                                <p class="text-sm font-medium text-gray-700 mb-1">Próximos passos:</p>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Use comandos como <code class="bg-gray-200 px-1 rounded">/slack send</code> no chat</li>
+                                    <li>• Configure automações na aba de Webhooks</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50 rounded-b-2xl">
+                <button id="btn-back" onclick="prevStep()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors hidden">
+                    ← Voltar
+                </button>
+                <div class="flex items-center gap-3 ml-auto">
+                    <button onclick="closeModal('connect-modal')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Cancelar</button>
+                    <button id="btn-next" onclick="nextStep()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 flex items-center gap-2">
+                        Autorizar
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Webhook Modal -->
+    <div id="create-webhook-modal" class="modal fixed inset-0 bg-black/50 flex items-center justify-center z-50 opacity-0 invisible">
+        <div class="modal-content bg-white rounded-2xl w-full max-w-lg transform scale-95 -translate-y-4 shadow-2xl">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Criar Webhook</h3>
+                    <button onclick="closeModal('create-webhook-modal')" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">URL do Endpoint</label>
+                    <input type="url" placeholder="https://api.example.com/webhooks" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome (opcional)</label>
+                    <input type="text" placeholder="ex: Produção" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Eventos</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" class="w-4 h-4 text-indigo-600 rounded border-gray-300">
+                            <span class="text-sm text-gray-600">message.received</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" class="w-4 h-4 text-indigo-600 rounded border-gray-300">
+                            <span class="text-sm text-gray-600">message.sent</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" class="w-4 h-4 text-indigo-600 rounded border-gray-300">
+                            <span class="text-sm text-gray-600">task.created</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" class="w-4 h-4 text-indigo-600 rounded border-gray-300">
+                            <span class="text-sm text-gray-600">user.joined</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Secret (opcional)</label>
+                    <input type="text" placeholder="whsec_..." class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <p class="text-xs text-gray-500 mt-1">Usado para verificar a assinatura das requisições</p>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 bg-gray-50 rounded-b-2xl">
+                <button onclick="closeModal('create-webhook-modal')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Cancelar</button>
+                <button class="px-6 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">Criar Webhook</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create API Key Modal -->
+    <div id="create-key-modal" class="modal fixed inset-0 bg-black/50 flex items-center justify-center z-50 opacity-0 invisible">
+        <div class="modal-content bg-white rounded-2xl w-full max-w-lg transform scale-95 -translate-y-4 shadow-2xl">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Criar Nova API Key</h3>
+                    <button onclick="closeModal('create-key-modal')" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Key</label>
+                    <input type="text" placeholder="ex: Production API Key" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ambiente</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-indigo-300 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+                            <input type="radio" name="env" value="live" class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Production</p>
+                                <p class="text-xs text-gray-500">Ambiente real</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-indigo-300 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+                            <input type="radio" name="env" value="test" checked class="w-4 h-4 text-indigo-600">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Test</p>
+                                <p class="text-xs text-gray-500">Ambiente de testes</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Permissões</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" checked class="w-4 h-4 text-indigo-600 rounded border-gray-300">
+                            <span class="text-sm text-gray-600">Leitura (GET)</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" checked class="w-4 h-4 text-indigo-600 rounded border-gray-300">
+                            <span class="text-sm text-gray-600">Escrita (POST, PUT, DELETE)</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" class="w-4 h-4 text-indigo-600 rounded border-gray-300">
+                            <span class="text-sm text-gray-600">Administração</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Expiração (opcional)</label>
+                    <select class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option>Nunca expira</option>
+                        <option>30 dias</option>
+                        <option>90 dias</option>
+                        <option>1 ano</option>
+                    </select>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 bg-gray-50 rounded-b-2xl">
+                <button onclick="closeModal('create-key-modal')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Cancelar</button>
+                <button class="px-6 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">Criar Key</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Integration Modal -->
+    <div id="request-modal" class="modal fixed inset-0 bg-black/50 flex items-center justify-center z-50 opacity-0 invisible">
+        <div class="modal-content bg-white rounded-2xl w-full max-w-lg transform scale-95 -translate-y-4 shadow-2xl">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Solicitar Integração</h3>
+                    <button onclick="closeModal('request-modal')" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-gray-600">Não encontrou a integração que precisa? Nos conte qual ferramenta você gostaria de conectar e priorizaremos no nosso roadmap.</p>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Ferramenta</label>
+                    <input type="text" placeholder="ex: Trello, Asana, Linear..." class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Como você usaria?</label>
+                    <textarea rows="3" placeholder="Descreva seu caso de uso..." class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 bg-gray-50 rounded-b-2xl">
+                <button onclick="closeModal('request-modal')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Cancelar</button>
+                <button onclick="closeModal('request-modal')" class="px-6 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">Enviar Solicitação</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tab) {
+            ['apps', 'webhooks', 'api-keys'].forEach(t => {
+                document.getElementById(`content-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('tab-active');
+            });
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('tab-active');
+        }
+
+        // Category filtering
+        function filterCategory(category) {
+            document.querySelectorAll('.category-chip').forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.textContent.toLowerCase().includes(category) || (category === 'all' && chip.textContent.includes('Todas'))) {
+                    chip.classList.add('active');
+                }
+            });
+            
+            document.querySelectorAll('.integration-card').forEach(card => {
+                if (category === 'all') {
+                    card.style.display = '';
+                } else {
+                    const cardCategory = card.getAttribute('data-category');
+                    card.style.display = cardCategory === category ? '' : 'none';
+                }
+            });
+        }
+
+        // Modal handling
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            document.body.style.overflow = '';
+            // Reset connect modal steps
+            if (id === 'connect-modal') {
+                currentStep = 1;
+                updateStepUI();
+            }
+        }
+
+        // OAuth Connect Modal
+        let currentStep = 1;
+        const integrationData = {
+            'slack': { name: 'Slack', color: '#4A154B' },
+            'notion': { name: 'Notion', color: '#000000' },
+            'hubspot': { name: 'HubSpot', color: '#FF7A59' },
+            'salesforce': { name: 'Salesforce', color: '#00A1E0' },
+            'zapier': { name: 'Zapier', color: '#FF4A00' }
+        };
+
+        function openConnectModal(integration) {
+            const data = integrationData[integration];
+            document.getElementById('modal-title').textContent = `Conectar ${data.name}`;
+            document.getElementById('modal-subtitle').textContent = `Configure sua integração com ${data.name}`;
+            currentStep = 1;
+            updateStepUI();
+            openModal('connect-modal');
+        }
+
+        function updateStepUI() {
+            // Update step indicators
+            for (let i = 1; i <= 3; i++) {
+                const indicator = document.getElementById(`step-${i}`);
+                const content = document.getElementById(`step-content-${i}`);
+                
+                indicator.classList.remove('active', 'completed');
+                content.classList.add('hidden');
+                
+                if (i < currentStep) {
+                    indicator.classList.add('completed');
+                    indicator.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>';
+                } else if (i === currentStep) {
+                    indicator.classList.add('active');
+                    indicator.textContent = i;
+                    content.classList.remove('hidden');
+                } else {
+                    indicator.textContent = i;
+                }
+            }
+            
+            // Update buttons
+            const backBtn = document.getElementById('btn-back');
+            const nextBtn = document.getElementById('btn-next');
+            
+            backBtn.classList.toggle('hidden', currentStep === 1);
+            
+            if (currentStep === 1) {
+                nextBtn.innerHTML = 'Autorizar <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>';
+            } else if (currentStep === 2) {
+                nextBtn.innerHTML = 'Continuar <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>';
+            } else {
+                nextBtn.innerHTML = 'Concluir <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>';
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < 3) {
+                currentStep++;
+                updateStepUI();
+            } else {
+                closeModal('connect-modal');
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepUI();
+            }
+        }
+
+        // Integration detail (for connected integrations)
+        function openIntegrationDetail(integration) {
+            // Could open a detail/settings modal
+            console.log('Open detail for:', integration);
+        }
+
+        // API Key visibility toggle
+        function toggleKeyVisibility(keyId) {
+            const keyElement = document.getElementById(keyId);
+            keyElement.classList.toggle('api-key-hidden');
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const tooltip = button.querySelector('.copy-tooltip');
+                tooltip.classList.add('show');
+                setTimeout(() => tooltip.classList.remove('show'), 2000);
+            });
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    closeModal(modal.id);
+                });
+            }
+        });
+
+        // Close modal on backdrop click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
